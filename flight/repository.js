@@ -2,7 +2,7 @@ import Flight from 'flight';
 
 class Repository {
     constructor() {
-        this.events = Flight.getOrCreateEventPool;
+        this.on = Flight.getOrCreateEventPool;
     }
 
     static attachTo(eventPoolPath) {

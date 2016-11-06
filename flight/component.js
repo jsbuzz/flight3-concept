@@ -23,7 +23,11 @@ class Component {
         return this.eventPool || (this.eventPool = EventPool.forComponent(this));
     }
 
-    events(path) {
+    on(path) {
+        if(path instanceof EventPool) {
+            return path;
+        }
+
         if(!path || path == 'ui') {
             return this.getOrCreateEventPool();
         } else if(path.substring(0,3) === "ui:") {

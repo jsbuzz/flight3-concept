@@ -1,6 +1,7 @@
 import Flight from 'flight';
-import Events from 'events';
 import Todo from 'domain/todo';
+import Events from 'events';
+import EventChannels from 'events/channels';
 
 class TodoComponent extends Flight.Component {
     constructor(todo) {
@@ -9,19 +10,19 @@ class TodoComponent extends Flight.Component {
     }
 
     listen() {
-        this.events(`data/todo/#${this.todo.id}`).on(
+        EventChannels.Todo.$(this.todo.id).listen(
             Events.Todo.Updated, event => this.update(event.todo)
         );
-        this.events('ui:label').on(
+        this.on('ui:label').listen(
             'dblclick', event => this.setEditMode(true),
         );
-        this.events('ui:.edit').on(
+        this.on('ui:.edit').listen(
             'keypress', event => this.onEditorKeyPress(event),
         );
-        this.events('ui:.toggle').on(
+        this.on('ui:.toggle').listen(
             'click', event => this.toggleState(event),
         );
-        this.events('ui:.destroy').on(
+        this.on('ui:.destroy').listen(
             'click', event => this.destroy(),
         );
     }
@@ -50,7 +51,7 @@ class TodoComponent extends Flight.Component {
     toggleState(event) {
         this.todo.state = this.toggle.checked ? Todo.Completed : Todo.Active;
 
-        this.events(`data/todo`).trigger(
+        EventChannels.Todo.trigger(
             new Events.Todo.Update(this.todo)
         );
     }
@@ -65,7 +66,7 @@ class TodoComponent extends Flight.Component {
 
             this.setEditMode(false);
 
-            this.events(`data/todo`).trigger(
+            EventChannels.Todo.trigger(
                 new Events.Todo.Update(this.todo)
             );
         }
@@ -80,7 +81,7 @@ class TodoComponent extends Flight.Component {
     }
 
     destroy() {
-        this.events(`data/todo`).trigger(
+        EventChannels.Todo.trigger(
             new Events.Todo.Remove(this.todo)
         );
     }

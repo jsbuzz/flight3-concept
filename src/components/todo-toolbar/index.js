@@ -1,13 +1,14 @@
 import Flight from 'flight';
 import Events from 'events';
+import EventChannels from 'events/channels';
 
 class TodoToolbarComponent extends Flight.Component {
 
     listen() {
-        this.events('data/todo').on(
+        EventChannels.Todo.listen(
             Events.TodoList.ActiveCount, event => this.refreshCounter(event.activeCount),
         );
-        this.events('ui:#filters').on(
+        this.on('ui:#filters').listen(
             'click', event => this.filterClick(event),
         );
 
@@ -15,13 +16,9 @@ class TodoToolbarComponent extends Flight.Component {
     }
 
     filterClick(event) {
-        if(event.srcElement.className == 'selected') {
-            return ;
-        }
-
         let state = event.srcElement.id.substring(7);
         state == 'all' && (state = false);
-        this.events('data/todo').trigger(
+        EventChannels.Todo.trigger(
             new Events.TodoList.Request(state)
         );
 

@@ -58,15 +58,15 @@
 
 	var _todo2 = _interopRequireDefault(_todo);
 
-	var _todoList = __webpack_require__(12);
+	var _todoList = __webpack_require__(13);
 
 	var _todoList2 = _interopRequireDefault(_todoList);
 
-	var _newTodo = __webpack_require__(14);
+	var _newTodo = __webpack_require__(15);
 
 	var _newTodo2 = _interopRequireDefault(_newTodo);
 
-	var _todoToolbar = __webpack_require__(15);
+	var _todoToolbar = __webpack_require__(16);
 
 	var _todoToolbar2 = _interopRequireDefault(_todoToolbar);
 
@@ -158,8 +158,8 @@
 	            this.element.dispatchEvent(flightEvent.originalEvent);
 	        }
 	    }, {
-	        key: 'on',
-	        value: function on() {
+	        key: 'listen',
+	        value: function listen() {
 	            for (var i = 0; i < arguments.length; i += 2) {
 	                this.addEventListener(arguments.length <= i ? undefined : arguments[i], arguments.length <= i + 1 ? undefined : arguments[i + 1]);
 	            }
@@ -176,6 +176,11 @@
 	                    return eventHandler(event.detail);
 	                });
 	            }
+	        }
+	    }, {
+	        key: '$',
+	        value: function $(key) {
+	            return getOrCreateEventPool(this.path + '/#' + key);
 	        }
 	    }], [{
 	        key: 'forElement',
@@ -485,8 +490,12 @@
 	            return this.eventPool || (this.eventPool = _eventPool.EventPool.forComponent(this));
 	        }
 	    }, {
-	        key: 'events',
-	        value: function events(path) {
+	        key: 'on',
+	        value: function on(path) {
+	            if (path instanceof _eventPool.EventPool) {
+	                return path;
+	            }
+
 	            if (!path || path == 'ui') {
 	                return this.getOrCreateEventPool();
 	            } else if (path.substring(0, 3) === "ui:") {
@@ -649,7 +658,11 @@
 
 	var _events2 = _interopRequireDefault(_events);
 
-	var _todo = __webpack_require__(11);
+	var _channels = __webpack_require__(11);
+
+	var _channels2 = _interopRequireDefault(_channels);
+
+	var _todo = __webpack_require__(12);
 
 	var _todo2 = _interopRequireDefault(_todo);
 
@@ -679,7 +692,7 @@
 	        value: function listen() {
 	            var _this2 = this;
 
-	            this.events("data/todo").on(_events2.default.Todo.Add, function (event) {
+	            _channels2.default.Todo.listen(_events2.default.Todo.Add, function (event) {
 	                return _this2.add(event.title);
 	            }, _events2.default.Todo.Update, function (event) {
 	                return _this2.update(event.todo);
@@ -699,25 +712,25 @@
 
 	            this.todos.set(item.id, item);
 
-	            this.events('data/todo').trigger(new _events2.default.Todo.Added(item));
-	            this.events('data/todo').trigger(new _events2.default.TodoList.ActiveCount(this.activeCount()));
+	            _channels2.default.Todo.trigger(new _events2.default.Todo.Added(item));
+	            _channels2.default.Todo.trigger(new _events2.default.TodoList.ActiveCount(this.activeCount()));
 	        }
 	    }, {
 	        key: 'update',
 	        value: function update(todo) {
 	            var item = new _todo2.default(todo);
 	            this.todos.set(item.id, item);
-	            this.events('data/todo/#' + item.id).trigger(new _events2.default.Todo.Updated(item));
-	            this.events('data/todo').trigger(new _events2.default.TodoList.ActiveCount(this.activeCount()));
+	            _channels2.default.Todo.$(todo.id).trigger(new _events2.default.Todo.Updated(item));
+	            _channels2.default.Todo.trigger(new _events2.default.TodoList.ActiveCount(this.activeCount()));
 	        }
 	    }, {
 	        key: 'remove',
 	        value: function remove(todo) {
 	            var item = new _todo2.default(todo);
 	            this.todos.delete(todo.id);
-	            this.events("data/todo").trigger(new _events2.default.Todo.Removed(item));
-	            this.events('data/todo').trigger(new _events2.default.TodoList.ActiveCount(this.activeCount()));
-	            this.events('data/todo/#' + item.id).detach();
+	            _channels2.default.Todo.trigger(new _events2.default.Todo.Removed(item));
+	            _channels2.default.Todo.trigger(new _events2.default.TodoList.ActiveCount(this.activeCount()));
+	            _channels2.default.Todo.$(todo.id).detach();
 	        }
 	    }, {
 	        key: 'prepareList',
@@ -753,7 +766,7 @@
 	                }
 	            }
 
-	            this.events("data/todo").trigger(new _events2.default.TodoList.Ready(list));
+	            _channels2.default.Todo.trigger(new _events2.default.TodoList.Ready(list));
 	        }
 	    }, {
 	        key: 'activeCount',
@@ -821,7 +834,7 @@
 	    function Repository() {
 	        _classCallCheck(this, Repository);
 
-	        this.events = _flight2.default.getOrCreateEventPool;
+	        this.on = _flight2.default.getOrCreateEventPool;
 	    }
 
 	    _createClass(Repository, null, [{
@@ -843,6 +856,27 @@
 
 /***/ },
 /* 11 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+
+	var _flight = __webpack_require__(1);
+
+	var _flight2 = _interopRequireDefault(_flight);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var EventChannels = {};
+	EventChannels.Todo = _flight2.default.getOrCreateEventPool('data/todo');
+
+	exports.default = EventChannels;
+
+/***/ },
+/* 12 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -867,7 +901,7 @@
 	exports.default = Todo;
 
 /***/ },
-/* 12 */
+/* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -886,7 +920,11 @@
 
 	var _events2 = _interopRequireDefault(_events);
 
-	var _todoItem = __webpack_require__(13);
+	var _channels = __webpack_require__(11);
+
+	var _channels2 = _interopRequireDefault(_channels);
+
+	var _todoItem = __webpack_require__(14);
 
 	var _todoItem2 = _interopRequireDefault(_todoItem);
 
@@ -912,7 +950,7 @@
 	        value: function listen() {
 	            var _this2 = this;
 
-	            this.events("data/todo").on(_events2.default.Todo.Added, function (event) {
+	            _channels2.default.Todo.listen(_events2.default.Todo.Added, function (event) {
 	                return _this2.addTodo(event.todo);
 	            }, _events2.default.Todo.Removed, function (event) {
 	                return _this2.removeTodo(event.todo);
@@ -976,7 +1014,7 @@
 	exports.default = TodoListComponent;
 
 /***/ },
-/* 13 */
+/* 14 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -993,13 +1031,17 @@
 
 	var _flight2 = _interopRequireDefault(_flight);
 
+	var _todo = __webpack_require__(12);
+
+	var _todo2 = _interopRequireDefault(_todo);
+
 	var _events = __webpack_require__(6);
 
 	var _events2 = _interopRequireDefault(_events);
 
-	var _todo = __webpack_require__(11);
+	var _channels = __webpack_require__(11);
 
-	var _todo2 = _interopRequireDefault(_todo);
+	var _channels2 = _interopRequireDefault(_channels);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -1026,19 +1068,19 @@
 	        value: function listen() {
 	            var _this2 = this;
 
-	            this.events('data/todo/#' + this.todo.id).on(_events2.default.Todo.Updated, function (event) {
+	            _channels2.default.Todo.$(this.todo.id).listen(_events2.default.Todo.Updated, function (event) {
 	                return _this2.update(event.todo);
 	            });
-	            this.events('ui:label').on('dblclick', function (event) {
+	            this.on('ui:label').listen('dblclick', function (event) {
 	                return _this2.setEditMode(true);
 	            });
-	            this.events('ui:.edit').on('keypress', function (event) {
+	            this.on('ui:.edit').listen('keypress', function (event) {
 	                return _this2.onEditorKeyPress(event);
 	            });
-	            this.events('ui:.toggle').on('click', function (event) {
+	            this.on('ui:.toggle').listen('click', function (event) {
 	                return _this2.toggleState(event);
 	            });
-	            this.events('ui:.destroy').on('click', function (event) {
+	            this.on('ui:.destroy').listen('click', function (event) {
 	                return _this2.destroy();
 	            });
 	        }
@@ -1069,7 +1111,7 @@
 	        value: function toggleState(event) {
 	            this.todo.state = this.toggle.checked ? _todo2.default.Completed : _todo2.default.Active;
 
-	            this.events('data/todo').trigger(new _events2.default.Todo.Update(this.todo));
+	            _channels2.default.Todo.trigger(new _events2.default.Todo.Update(this.todo));
 	        }
 	    }, {
 	        key: 'setEditMode',
@@ -1084,7 +1126,7 @@
 
 	                this.setEditMode(false);
 
-	                this.events('data/todo').trigger(new _events2.default.Todo.Update(this.todo));
+	                _channels2.default.Todo.trigger(new _events2.default.Todo.Update(this.todo));
 	            }
 	        }
 	    }, {
@@ -1099,7 +1141,7 @@
 	    }, {
 	        key: 'destroy',
 	        value: function destroy() {
-	            this.events('data/todo').trigger(new _events2.default.Todo.Remove(this.todo));
+	            _channels2.default.Todo.trigger(new _events2.default.Todo.Remove(this.todo));
 	        }
 	    }]);
 
@@ -1109,7 +1151,7 @@
 	exports.default = TodoComponent;
 
 /***/ },
-/* 14 */
+/* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1127,6 +1169,10 @@
 	var _events = __webpack_require__(6);
 
 	var _events2 = _interopRequireDefault(_events);
+
+	var _channels = __webpack_require__(11);
+
+	var _channels2 = _interopRequireDefault(_channels);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -1150,7 +1196,7 @@
 	        value: function listen() {
 	            var _this2 = this;
 
-	            this.events('ui').on('keypress', function (event) {
+	            this.on('ui').listen('keypress', function (event) {
 	                return _this2.onKeyPress(event);
 	            });
 	        }
@@ -1158,7 +1204,7 @@
 	        key: 'onKeyPress',
 	        value: function onKeyPress(event) {
 	            if (event.charCode == 13 && this.view.value.length) {
-	                this.events('data/todo').trigger(new _events2.default.Todo.Add(this.view.value));
+	                _channels2.default.Todo.trigger(new _events2.default.Todo.Add(this.view.value));
 	                this.view.value = "";
 	            }
 	        }
@@ -1170,7 +1216,7 @@
 	exports.default = NewTodoComponent;
 
 /***/ },
-/* 15 */
+/* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1188,6 +1234,10 @@
 	var _events = __webpack_require__(6);
 
 	var _events2 = _interopRequireDefault(_events);
+
+	var _channels = __webpack_require__(11);
+
+	var _channels2 = _interopRequireDefault(_channels);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -1211,10 +1261,10 @@
 	        value: function listen() {
 	            var _this2 = this;
 
-	            this.events('data/todo').on(_events2.default.TodoList.ActiveCount, function (event) {
+	            _channels2.default.Todo.listen(_events2.default.TodoList.ActiveCount, function (event) {
 	                return _this2.refreshCounter(event.activeCount);
 	            });
-	            this.events('ui:#filters').on('click', function (event) {
+	            this.on('ui:#filters').listen('click', function (event) {
 	                return _this2.filterClick(event);
 	            });
 
@@ -1223,13 +1273,9 @@
 	    }, {
 	        key: 'filterClick',
 	        value: function filterClick(event) {
-	            if (event.srcElement.className == 'selected') {
-	                return;
-	            }
-
 	            var state = event.srcElement.id.substring(7);
 	            state == 'all' && (state = false);
-	            this.events('data/todo').trigger(new _events2.default.TodoList.Request(state));
+	            _channels2.default.Todo.trigger(new _events2.default.TodoList.Request(state));
 
 	            this.view.querySelector('.selected').className = '';
 	            event.srcElement.className = 'selected';

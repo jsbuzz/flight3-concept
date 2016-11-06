@@ -1,5 +1,6 @@
 import Repository from 'flight/repository';
 import Events from 'events';
+import EventChannels from 'events/channels';
 import Todo from 'domain/todo';
 
 class TodoRepository extends Repository {
@@ -10,7 +11,7 @@ class TodoRepository extends Repository {
     }
 
     listen() {
-        this.events("data/todo").on(
+        EventChannels.Todo.listen(
             Events.Todo.Add, event => this.add(event.title),
             Events.Todo.Update, event => this.update(event.todo),
             Events.Todo.Remove, event => this.remove(event.todo),
@@ -26,23 +27,23 @@ class TodoRepository extends Repository {
 
         this.todos.set(item.id, item);
 
-        this.events('data/todo').trigger(new Events.Todo.Added(item));
-        this.events('data/todo').trigger(new Events.TodoList.ActiveCount(this.activeCount()));
+        EventChannels.Todo.trigger(new Events.Todo.Added(item));
+        EventChannels.Todo.trigger(new Events.TodoList.ActiveCount(this.activeCount()));
     }
 
     update(todo) {
         const item = new Todo(todo);
         this.todos.set(item.id, item);
-        this.events(`data/todo/#${item.id}`).trigger(new Events.Todo.Updated(item));
-        this.events('data/todo').trigger(new Events.TodoList.ActiveCount(this.activeCount()));
+        EventChannels.Todo.$(todo.id).trigger(new Events.Todo.Updated(item));
+        EventChannels.Todo.trigger(new Events.TodoList.ActiveCount(this.activeCount()));
     }
 
     remove(todo) {
         const item = new Todo(todo);
         this.todos.delete(todo.id);
-        this.events("data/todo").trigger(new Events.Todo.Removed(item));
-        this.events('data/todo').trigger(new Events.TodoList.ActiveCount(this.activeCount()));
-        this.events(`data/todo/#${item.id}`).detach();
+        EventChannels.Todo.trigger(new Events.Todo.Removed(item));
+        EventChannels.Todo.trigger(new Events.TodoList.ActiveCount(this.activeCount()));
+        EventChannels.Todo.$(todo.id).detach();
     }
 
     prepareList(requestEvent) {
@@ -54,7 +55,7 @@ class TodoRepository extends Repository {
             }
         }
 
-        this.events("data/todo").trigger(new Events.TodoList.Ready(list));
+        EventChannels.Todo.trigger(new Events.TodoList.Ready(list));
     }
 
     activeCount() {

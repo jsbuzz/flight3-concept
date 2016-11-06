@@ -5,7 +5,7 @@ export class EventPool {
         this.element.dispatchEvent(flightEvent.originalEvent);
     }
 
-    on(...listeners) {
+    listen(...listeners) {
         for(let i=0; i < listeners.length; i+=2) {
             this.addEventListener(listeners[i], listeners[i+1]);
         }
@@ -23,6 +23,10 @@ export class EventPool {
                 event => eventHandler(event.detail)
             );
         }
+    }
+
+    $(key) {
+        return getOrCreateEventPool(`${this.path}/#${key}`);
     }
 
     static forElement(element, component) {

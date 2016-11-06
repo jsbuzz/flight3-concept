@@ -1,13 +1,14 @@
 import Flight from 'flight';
 import Events from 'events';
+import EventChannels from 'events/channels';
 import TodoComponent from 'components/todo-item';
 
 class TodoListComponent extends Flight.Component {
     listen() {
-        this.events("data/todo").on(
-            Events.Todo.Added,   event => this.addTodo(event.todo),
+        EventChannels.Todo.listen(
+            Events.Todo.Added, event => this.addTodo(event.todo),
             Events.Todo.Removed, event => this.removeTodo(event.todo),
-            Events.TodoList.Ready,  event => this.showTodoList(event.todos)
+            Events.TodoList.Ready, event => this.showTodoList(event.todos)
         );
     }
 
