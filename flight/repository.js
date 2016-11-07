@@ -1,8 +1,8 @@
-import Flight from 'flight';
+import Flight from './';
 
 class Repository {
-    constructor() {
-        this.on = Flight.getOrCreateEventPool;
+    on(path) {
+        return Flight.getOrCreateEventPool(path);
     }
 
     static attachTo(eventPoolPath) {

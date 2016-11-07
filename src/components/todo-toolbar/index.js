@@ -1,11 +1,10 @@
 import Flight from 'flight';
 import Events from 'events';
-import EventChannels from 'events/channels';
 
 class TodoToolbarComponent extends Flight.Component {
 
     listen() {
-        EventChannels.Todo.listen(
+        this.on('data/todo').listen(
             Events.TodoList.ActiveCount, event => this.refreshCounter(event.activeCount),
         );
         this.on('ui:#filters').listen(
@@ -18,8 +17,8 @@ class TodoToolbarComponent extends Flight.Component {
     filterClick(event) {
         let state = event.srcElement.id.substring(7);
         state == 'all' && (state = false);
-        EventChannels.Todo.trigger(
-            new Events.TodoList.Request(state)
+        this.on('data/todo').trigger(
+            new Events.TodoList.Filter(state)
         );
 
         this.view.querySelector(`.selected`).className = '';

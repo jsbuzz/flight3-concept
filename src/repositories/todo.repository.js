@@ -1,6 +1,5 @@
 import Repository from 'flight/repository';
 import Events from 'events';
-import EventChannels from 'events/channels';
 import Todo from 'domain/todo';
 
 class TodoRepository extends Repository {
@@ -11,7 +10,7 @@ class TodoRepository extends Repository {
     }
 
     listen() {
-        EventChannels.Todo.listen(
+        this.on('data/todo').listen(
             Events.Todo.Add, event => this.add(event.title),
             Events.Todo.Update, event => this.update(event.todo),
             Events.Todo.Remove, event => this.remove(event.todo),
@@ -27,23 +26,23 @@ class TodoRepository extends Repository {
 
         this.todos.set(item.id, item);
 
-        EventChannels.Todo.trigger(new Events.Todo.Added(item));
-        EventChannels.Todo.trigger(new Events.TodoList.ActiveCount(this.activeCount()));
+        this.on('data/todo').trigger(new Events.Todo.Added(item));
+        this.on('data/todo').trigger(new Events.TodoList.ActiveCount(this.activeCount()));
     }
 
     update(todo) {
         const item = new Todo(todo);
         this.todos.set(item.id, item);
-        EventChannels.Todo.$(todo.id).trigger(new Events.Todo.Updated(item));
-        EventChannels.Todo.trigger(new Events.TodoList.ActiveCount(this.activeCount()));
+        this.on('data/todo').$(todo.id).trigger(new Events.Todo.Updated(item));
+        this.on('data/todo').trigger(new Events.TodoList.ActiveCount(this.activeCount()));
     }
 
     remove(todo) {
         const item = new Todo(todo);
         this.todos.delete(todo.id);
-        EventChannels.Todo.trigger(new Events.Todo.Removed(item));
-        EventChannels.Todo.trigger(new Events.TodoList.ActiveCount(this.activeCount()));
-        EventChannels.Todo.$(todo.id).detach();
+        this.on('data/todo').trigger(new Events.Todo.Removed(item));
+        this.on('data/todo').trigger(new Events.TodoList.ActiveCount(this.activeCount()));
+        this.on('data/todo').$(todo.id).detach();
     }
 
     prepareList(requestEvent) {
@@ -55,7 +54,7 @@ class TodoRepository extends Repository {
             }
         }
 
-        EventChannels.Todo.trigger(new Events.TodoList.Ready(list));
+        this.on('data/todo').trigger(new Events.TodoList.Ready(list));
     }
 
     activeCount() {

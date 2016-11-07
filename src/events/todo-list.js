@@ -16,6 +16,7 @@ const ActiveCount = Flight.eventType(
     }
 );
 
+TodoList.Filter = Flight.eventOfType(TodoListRequest).alias('TodoList:Filter');
 TodoList.Request = Flight.eventOfType(TodoListRequest).alias('TodoList:Request');
 TodoList.Ready = Flight.eventOfType(TodoList).alias('TodoList:Ready');
 TodoList.ActiveCount = Flight.eventOfType(ActiveCount).alias('TodoList:ActiveCount');

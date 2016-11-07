@@ -1,7 +1,6 @@
 import Flight from 'flight';
 import Todo from 'domain/todo';
 import Events from 'events';
-import EventChannels from 'events/channels';
 
 class TodoComponent extends Flight.Component {
     constructor(todo) {
@@ -10,7 +9,7 @@ class TodoComponent extends Flight.Component {
     }
 
     listen() {
-        EventChannels.Todo.$(this.todo.id).listen(
+        this.on(`data/todo/#${this.todo.id}`).listen(
             Events.Todo.Updated, event => this.update(event.todo)
         );
         this.on('ui:label').listen(
@@ -51,7 +50,7 @@ class TodoComponent extends Flight.Component {
     toggleState(event) {
         this.todo.state = this.toggle.checked ? Todo.Completed : Todo.Active;
 
-        EventChannels.Todo.trigger(
+        this.on('data/todo').trigger(
             new Events.Todo.Update(this.todo)
         );
     }
@@ -66,7 +65,7 @@ class TodoComponent extends Flight.Component {
 
             this.setEditMode(false);
 
-            EventChannels.Todo.trigger(
+            this.on('data/todo').trigger(
                 new Events.Todo.Update(this.todo)
             );
         }
@@ -81,7 +80,7 @@ class TodoComponent extends Flight.Component {
     }
 
     destroy() {
-        EventChannels.Todo.trigger(
+        this.on('data/todo').trigger(
             new Events.Todo.Remove(this.todo)
         );
     }

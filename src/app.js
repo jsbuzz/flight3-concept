@@ -2,6 +2,8 @@
 import Flight from 'flight';
 import Events from 'events';
 
+import Debugger from 'flight/debugger';
+
 import TodoRepository from 'repositories/todo.repository';
 import TodoListComponent from 'components/todo-list';
 import NewTodoComponent from 'components/new-todo';

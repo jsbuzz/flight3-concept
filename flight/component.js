@@ -43,6 +43,9 @@ class Component {
         const instance = new this(element);
         instance.view = element;
         instance.listen();
+
+        window.components ||  (window.components = []);
+        window.components.push(instance);
     }
 }
 
