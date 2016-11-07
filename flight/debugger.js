@@ -19,19 +19,23 @@ Repository.prototype.on = function(path) {
 // EventPool
 EventPool.prototype.$$trigger = EventPool.prototype.trigger;
 EventPool.prototype.trigger = function(flightEvent) {
-    console.log(`${actor.constructor.name} triggering ${flightEvent.name}`);
+    console.log(`${flightEvent.name} triggered by ${actor.constructor.name}`);
     return this.$$trigger(flightEvent);
 };
 
 EventPool.prototype.$$addEventListener = EventPool.prototype.addEventListener;
 EventPool.prototype.addEventListener = function(flightEvent, handler) {
-    let eventName = (typeof flightEvent == 'string')
-        ? flightEvent : flightEvent.EventName;
+    let nativeEvent = (typeof flightEvent == 'string');
+    let eventName = nativeEvent ? flightEvent : flightEvent.EventName;
     let boundActor = actor.constructor.name;
 
     const debugHandler = function(event) {
-        console.log(`${boundActor} listening for ${eventName}`);
-        console.log(` > calling ${boundActor}.${handlerToString(handler)}`);
+        if(nativeEvent) {
+            console.log(`${eventName} was triggered on ${boundActor}`);
+        } else {
+            console.log(`    ${boundActor} listening for ${eventName}`);
+        }
+        console.log(`    calling ${boundActor}.${handlerToString(handler)}`);
         return handler(event);
     }
     return this.$$addEventListener(flightEvent, debugHandler);

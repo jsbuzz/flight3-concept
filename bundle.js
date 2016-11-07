@@ -54,23 +54,23 @@
 
 	var _events2 = _interopRequireDefault(_events);
 
-	var _debugger = __webpack_require__(16);
+	var _debugger = __webpack_require__(9);
 
 	var _debugger2 = _interopRequireDefault(_debugger);
 
-	var _todo = __webpack_require__(9);
+	var _todo = __webpack_require__(11);
 
 	var _todo2 = _interopRequireDefault(_todo);
 
-	var _todoList = __webpack_require__(12);
+	var _todoList = __webpack_require__(13);
 
 	var _todoList2 = _interopRequireDefault(_todoList);
 
-	var _newTodo = __webpack_require__(14);
+	var _newTodo = __webpack_require__(15);
 
 	var _newTodo2 = _interopRequireDefault(_newTodo);
 
-	var _todoToolbar = __webpack_require__(15);
+	var _todoToolbar = __webpack_require__(16);
 
 	var _todoToolbar2 = _interopRequireDefault(_todoToolbar);
 
@@ -654,6 +654,124 @@
 	    value: true
 	});
 
+	var _component = __webpack_require__(4);
+
+	var _component2 = _interopRequireDefault(_component);
+
+	var _repository = __webpack_require__(10);
+
+	var _repository2 = _interopRequireDefault(_repository);
+
+	var _eventPool = __webpack_require__(2);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var actor = null;
+
+	// this.on()
+	_component2.default.prototype.$$on = _component2.default.prototype.on;
+	_component2.default.prototype.on = function (path) {
+	    actor = this;
+	    return this.$$on(path);
+	};
+	_repository2.default.prototype.$$on = _repository2.default.prototype.on;
+	_repository2.default.prototype.on = function (path) {
+	    actor = this;
+	    return this.$$on(path);
+	};
+
+	// EventPool
+	_eventPool.EventPool.prototype.$$trigger = _eventPool.EventPool.prototype.trigger;
+	_eventPool.EventPool.prototype.trigger = function (flightEvent) {
+	    console.log(flightEvent.name + ' triggered by ' + actor.constructor.name);
+	    return this.$$trigger(flightEvent);
+	};
+
+	_eventPool.EventPool.prototype.$$addEventListener = _eventPool.EventPool.prototype.addEventListener;
+	_eventPool.EventPool.prototype.addEventListener = function (flightEvent, handler) {
+	    var nativeEvent = typeof flightEvent == 'string';
+	    var eventName = nativeEvent ? flightEvent : flightEvent.EventName;
+	    var boundActor = actor.constructor.name;
+
+	    var debugHandler = function debugHandler(event) {
+	        if (nativeEvent) {
+	            console.log(eventName + ' was triggered on ' + boundActor);
+	        } else {
+	            console.log('    ' + boundActor + ' listening for ' + eventName);
+	        }
+	        console.log('    calling ' + boundActor + '.' + handlerToString(handler));
+	        return handler(event);
+	    };
+	    return this.$$addEventListener(flightEvent, debugHandler);
+	};
+
+	function handlerToString(handler) {
+	    if (handler.name) {
+	        return handler.name;
+	    }
+	    return handler.toString().match(/_this[0-9][.]([^(]*)[(]/).pop();
+	}
+
+	var Debugger = {};
+	exports.default = Debugger;
+
+/***/ },
+/* 10 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _ = __webpack_require__(1);
+
+	var _2 = _interopRequireDefault(_);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var Repository = function () {
+	    function Repository() {
+	        _classCallCheck(this, Repository);
+	    }
+
+	    _createClass(Repository, [{
+	        key: 'on',
+	        value: function on(path) {
+	            return _2.default.getOrCreateEventPool(path);
+	        }
+	    }], [{
+	        key: 'attachTo',
+	        value: function attachTo(eventPoolPath) {
+	            var instance = new this();
+
+	            instance.eventPool = _2.default.getOrCreateEventPool(eventPoolPath);
+	            instance.listen();
+
+	            return instance;
+	        }
+	    }]);
+
+	    return Repository;
+	}();
+
+	exports.default = Repository;
+
+/***/ },
+/* 11 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+
 	var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -666,7 +784,7 @@
 
 	var _events2 = _interopRequireDefault(_events);
 
-	var _todo = __webpack_require__(11);
+	var _todo = __webpack_require__(12);
 
 	var _todo2 = _interopRequireDefault(_todo);
 
@@ -815,54 +933,7 @@
 	exports.default = TodoRepository;
 
 /***/ },
-/* 10 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-	var _ = __webpack_require__(1);
-
-	var _2 = _interopRequireDefault(_);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-	var Repository = function () {
-	    function Repository() {
-	        _classCallCheck(this, Repository);
-	    }
-
-	    _createClass(Repository, [{
-	        key: 'on',
-	        value: function on(path) {
-	            return _2.default.getOrCreateEventPool(path);
-	        }
-	    }], [{
-	        key: 'attachTo',
-	        value: function attachTo(eventPoolPath) {
-	            var instance = new this();
-
-	            instance.eventPool = _2.default.getOrCreateEventPool(eventPoolPath);
-	            instance.listen();
-
-	            return instance;
-	        }
-	    }]);
-
-	    return Repository;
-	}();
-
-	exports.default = Repository;
-
-/***/ },
-/* 11 */
+/* 12 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -887,7 +958,7 @@
 	exports.default = Todo;
 
 /***/ },
-/* 12 */
+/* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -906,7 +977,7 @@
 
 	var _events2 = _interopRequireDefault(_events);
 
-	var _todoItem = __webpack_require__(13);
+	var _todoItem = __webpack_require__(14);
 
 	var _todoItem2 = _interopRequireDefault(_todoItem);
 
@@ -1010,7 +1081,7 @@
 	exports.default = TodoListComponent;
 
 /***/ },
-/* 13 */
+/* 14 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1027,7 +1098,7 @@
 
 	var _flight2 = _interopRequireDefault(_flight);
 
-	var _todo = __webpack_require__(11);
+	var _todo = __webpack_require__(12);
 
 	var _todo2 = _interopRequireDefault(_todo);
 
@@ -1143,7 +1214,7 @@
 	exports.default = TodoComponent;
 
 /***/ },
-/* 14 */
+/* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1204,7 +1275,7 @@
 	exports.default = NewTodoComponent;
 
 /***/ },
-/* 15 */
+/* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1275,72 +1346,6 @@
 	}(_flight2.default.Component);
 
 	exports.default = TodoToolbarComponent;
-
-/***/ },
-/* 16 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-
-	var _component = __webpack_require__(4);
-
-	var _component2 = _interopRequireDefault(_component);
-
-	var _repository = __webpack_require__(10);
-
-	var _repository2 = _interopRequireDefault(_repository);
-
-	var _eventPool = __webpack_require__(2);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	var actor = null;
-
-	// this.on()
-	_component2.default.prototype.$$on = _component2.default.prototype.on;
-	_component2.default.prototype.on = function (path) {
-	    actor = this;
-	    return this.$$on(path);
-	};
-	_repository2.default.prototype.$$on = _repository2.default.prototype.on;
-	_repository2.default.prototype.on = function (path) {
-	    actor = this;
-	    return this.$$on(path);
-	};
-
-	// EventPool
-	_eventPool.EventPool.prototype.$$trigger = _eventPool.EventPool.prototype.trigger;
-	_eventPool.EventPool.prototype.trigger = function (flightEvent) {
-	    console.log(actor.constructor.name + ' triggering ' + flightEvent.name);
-	    return this.$$trigger(flightEvent);
-	};
-
-	_eventPool.EventPool.prototype.$$addEventListener = _eventPool.EventPool.prototype.addEventListener;
-	_eventPool.EventPool.prototype.addEventListener = function (flightEvent, handler) {
-	    var eventName = typeof flightEvent == 'string' ? flightEvent : flightEvent.EventName;
-	    var boundActor = actor.constructor.name;
-
-	    var debugHandler = function debugHandler(event) {
-	        console.log(boundActor + ' listening for ' + eventName);
-	        console.log(' > calling ' + boundActor + '.' + handlerToString(handler));
-	        return handler(event);
-	    };
-	    return this.$$addEventListener(flightEvent, debugHandler);
-	};
-
-	function handlerToString(handler) {
-	    if (handler.name) {
-	        return handler.name;
-	    }
-	    return handler.toString().match(/_this[0-9][.]([^(]*)[(]/).pop();
-	}
-
-	var Debugger = {};
-	exports.default = Debugger;
 
 /***/ }
 /******/ ]);
