@@ -1,7 +1,15 @@
 import { EventPool, getOrCreateEventPool } from './event-pool';
-import { getElement } from './DOM';
+import DOM from './DOM';
+import GC from './gc';
+
+let __componentId = 0;
 
 class Component {
+
+    constructor() {
+        this.componentId = ++__componentId;
+    }
+
     get view() {
         return this._view;
     }
@@ -9,6 +17,7 @@ class Component {
     set view(element) {
         this._view = element;
         this.getOrCreateEventPool().element = element;
+        GC.registerComponent(this);
     }
 
     listen() {}
@@ -34,19 +43,44 @@ class Component {
             let element = this.view.querySelector(path.substring(3));
             return EventPool.forElement(element, this);
         }
-        return getOrCreateEventPool(path);
+        return new EventPoolAccessor(this, getOrCreateEventPool(path));
+    }
+
+    addHandler(element, eventName, handler) {
+        this._handlers || (this._handlers = []);
+        this._handlers.push({
+            element : element,
+            event   : eventName,
+            handler : handler
+        });
     }
 
     static attachTo(element) {
-        element = getElement(element);
+        element = DOM.getElement(element);
 
         const instance = new this(element);
         instance.view = element;
         instance.listen();
-
-        window.components ||  (window.components = []);
-        window.components.push(instance);
     }
 }
+
+class EventPoolAccessor {
+    constructor(component, pool) {
+        this.component = component;
+        this.eventPool = pool;
+    }
+
+    listen(...listeners) {
+        for(let i=0; i < listeners.length; i+=2) {
+            let fn = this.eventPool.addEventListener(listeners[i], listeners[i+1]);
+            GC.registerListener(this.component, this.eventPool.element, listeners[i].EventName, fn);
+        }
+    }
+
+    trigger(event) {
+        return this.eventPool.trigger(event);
+    }
+}
+
 
 export default Component;

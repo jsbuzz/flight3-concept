@@ -1,6 +1,8 @@
 import Flight from 'flight';
 import Todo from 'domain/todo';
 import Events from 'events';
+import todoTemplate from './template.html';
+import TodoPatch from './todo.patch';
 
 class TodoComponent extends Flight.Component {
     constructor(todo) {
@@ -16,7 +18,8 @@ class TodoComponent extends Flight.Component {
             'dblclick', event => this.setEditMode(true),
         );
         this.on('ui:.edit').listen(
-            'keypress', event => this.onEditorKeyPress(event),
+            'keyup', event => this.onEditorKeyUp(event),
+            'blur', event => this.cancelEditor(),
         );
         this.on('ui:.toggle').listen(
             'click', event => this.toggleState(event),
@@ -27,28 +30,14 @@ class TodoComponent extends Flight.Component {
     }
 
     render() {
-        this.view = document.createElement('todo');
-
-        this.toggle = this.view.appendChild(document.createElement('input'));
-        this.toggle.className = "toggle";
-        this.toggle.type = "checkbox";
-
-        this.label = this.view.appendChild(document.createElement('label'));
-
-        this.remove = this.view.appendChild(document.createElement('button'));
-        this.remove.className = "destroy";
-
-        this.editor = this.view.appendChild(document.createElement('input'));
-        this.editor.className = "edit";
-        this.editor.type = "text";
-
+        this.view = Flight.DOM.render(todoTemplate);
+        this.patch = Flight.Patch.create(this.view, TodoPatch);
         this.update(this.todo);
-
         return super.render();
     }
 
     toggleState(event) {
-        this.todo.state = this.toggle.checked ? Todo.Completed : Todo.Active;
+        this.todo.state = this.view.$.toggle.checked ? Todo.Completed : Todo.Active;
 
         this.on('data/todo').trigger(
             new Events.Todo.Update(this.todo)
@@ -57,26 +46,33 @@ class TodoComponent extends Flight.Component {
 
     setEditMode(state) {
         this.view.className = state ? 'editing' : '';
+        state && this.view.$.editor.focus();
     }
 
-    onEditorKeyPress(event) {
-        if(event.charCode == 13) {
-            this.todo.title = this.editor.value;
+    onEditorKeyUp(event) {
+        if(event.keyCode == 13) {
+            this.todo.title = this.view.$.editor.value;
 
             this.setEditMode(false);
 
-            this.on('data/todo').trigger(
-                new Events.Todo.Update(this.todo)
-            );
+            if(this.view.$.editor.value) {
+                this.on('data/todo').trigger(
+                    new Events.Todo.Update(this.todo)
+                );
+            } else this.destroy();
+
+        } else if(event.keyCode == 27) {
+            this.cancelEditor()
         }
     }
 
+    cancelEditor() {
+        this.setEditMode(false);
+        this.view.$.editor.value = this.todo.title;
+    }
+
     update(todo) {
-        this.todo = todo;
-        this.label.textContent = todo.title;
-        this.editor.value = todo.title;
-        this.toggle.checked = todo.state == Todo.Completed;
-        this.view.className = todo.state;
+        this.patch.apply(todo);
     }
 
     destroy() {

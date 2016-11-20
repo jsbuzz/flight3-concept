@@ -12,17 +12,21 @@ export class EventPool {
     }
 
     addEventListener(flightEvent, eventHandler) {
+        let realHandler;
         if(typeof flightEvent == 'string') {
+            realHandler = event => eventHandler(event);
             this.element.addEventListener(
                 flightEvent,
-                event => eventHandler(event)
+                realHandler
             );
         } else {
+            realHandler = event => eventHandler(event.detail);
             this.element.addEventListener(
                 flightEvent.EventName,
-                event => eventHandler(event.detail)
+                realHandler
             );
         }
+        return realHandler;
     }
 
     $(key) {

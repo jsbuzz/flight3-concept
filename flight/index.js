@@ -2,6 +2,15 @@
 const Flight = {};
 export default Flight;
 
+
+// garbage Collector
+import GC from './gc';
+Flight.GC = GC;
+
+// Component
+import Component from './component';
+Flight.Component = Component;
+
 // eventPools
 import { EventPool, DataEventPool, getOrCreateEventPool, detachEventPool } from './event-pool';
 Flight.EventPool = EventPool;
@@ -16,6 +25,10 @@ Flight.eventType = eventType;
 Flight.eventOfType = eventOfType;
 Flight.basicEventOf = basicEventOf;
 
-// Component
-import Component from './component';
-Flight.Component = Component;
+// DOM
+import DOM from './DOM';
+Flight.DOM = DOM;
+
+// Patch
+import Patch from './patch';
+Flight.Patch = Patch;

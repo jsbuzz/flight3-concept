@@ -3,11 +3,6 @@ import Events from 'events';
 import TodoComponent from 'components/todo-item';
 
 class TodoListComponent extends Flight.Component {
-    constructor() {
-        super();
-        this.state = null;
-    }
-
     listen() {
         this.on('data/todo').listen(
             Events.Todo.Added, event => this.addTodo(event.todo),
@@ -18,9 +13,6 @@ class TodoListComponent extends Flight.Component {
     }
 
     addTodo(todo) {
-        if(this.state && todo.state !== this.state) {
-            return ;
-        }
         const todoComponent = new TodoComponent(todo);
         const newItem = document.createElement('li');
         newItem.id = `todo-${todo.id}`;
@@ -33,7 +25,6 @@ class TodoListComponent extends Flight.Component {
     }
 
     requestList(state) {
-        this.state = state;
         this.on('data/todo').trigger(
             new Events.TodoList.Request(state)
         );
@@ -41,6 +32,7 @@ class TodoListComponent extends Flight.Component {
 
     clearTodos() {
         this.view.innerHTML = "";
+        Flight.GC.runCheck();
     }
 
     showTodoList(todos) {

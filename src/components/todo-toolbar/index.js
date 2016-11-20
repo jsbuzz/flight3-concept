@@ -15,6 +15,7 @@ class TodoToolbarComponent extends Flight.Component {
     }
 
     filterClick(event) {
+        event.preventDefault();
         let state = event.srcElement.id.substring(7);
         state == 'all' && (state = false);
         this.on('data/todo').trigger(

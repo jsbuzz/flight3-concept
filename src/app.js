@@ -19,4 +19,3 @@ TodoListComponent.attachTo('#todo-list');
 TodoToolbarComponent.attachTo('#footer');
 
 window.Flight = Flight;
-window.Events = Events;
