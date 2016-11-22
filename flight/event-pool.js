@@ -1,8 +1,10 @@
+import GC from './gc';
 
 export class EventPool {
     trigger(flightEvent) {
         flightEvent.originalEvent = flightEvent.event();
         this.element.dispatchEvent(flightEvent.originalEvent);
+        GC.afterTrigger(flightEvent);
     }
 
     listen(...listeners) {

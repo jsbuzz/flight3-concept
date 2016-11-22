@@ -164,7 +164,8 @@
 
 	var GC = {
 	    components: new Map(),
-	    listeners: new Map()
+	    listeners: new Map(),
+	    timeout: 10
 	};
 
 	GC.registerComponent = function (component) {
@@ -178,6 +179,15 @@
 	        eventName: extractEventName(event),
 	        callback: callback
 	    });
+	};
+
+	GC.afterTrigger = function (flightEvent) {
+	    if (GC.timer) {
+	        clearTimeout(GC.timer);
+	    }
+	    GC.timer = setTimeout(function () {
+	        GC.runCheck();
+	    }, GC.timeout);
 	};
 
 	GC.destroy = function (component) {
@@ -254,32 +264,6 @@
 
 	exports.default = GC;
 
-	// setTimer
-
-	GC.timeout = 500;
-	GC.timeoutStep = function () {
-	    GC.timer = setTimeout(function () {
-	        GC.runCheck();
-	        if (!GC.stopped) {
-	            GC.timeoutStep();
-	        }
-	    }, GC.timeout);
-	};
-
-	GC.start = function () {
-	    if (!this.timer) {
-	        this.timeoutStep();
-	    }
-	    this.stopped = false;
-	};
-	GC.start();
-
-	GC.stop = function () {
-	    if (this.timer) {
-	        clearTimeout(this.timer);
-	    }
-	    this.stopped = true;
-	};
 
 	function extractEventName(event) {
 	    return typeof event == 'string' ? event : event.EventName;
@@ -418,18 +402,25 @@
 
 /***/ },
 /* 4 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
+	exports.DataEventPool = exports.EventPool = undefined;
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 	exports.getOrCreateEventPool = getOrCreateEventPool;
 	exports.detachEventPool = detachEventPool;
+
+	var _gc = __webpack_require__(2);
+
+	var _gc2 = _interopRequireDefault(_gc);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
@@ -447,6 +438,7 @@
 	        value: function trigger(flightEvent) {
 	            flightEvent.originalEvent = flightEvent.event();
 	            this.element.dispatchEvent(flightEvent.originalEvent);
+	            _gc2.default.afterTrigger(flightEvent);
 	        }
 	    }, {
 	        key: 'listen',

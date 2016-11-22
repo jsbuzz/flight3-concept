@@ -1,7 +1,8 @@
 
 const GC = {
     components: new Map(),
-    listeners : new Map()
+    listeners : new Map(),
+    timeout: 10
 };
 
 GC.registerComponent = function(component) {
@@ -15,6 +16,15 @@ GC.registerListener = function(component, element, event, callback) {
         eventName : extractEventName(event),
         callback  : callback
     });
+};
+
+GC.afterTrigger = function(flightEvent) {
+    if(GC.timer) {
+        clearTimeout(GC.timer);
+    }
+    GC.timer = setTimeout(function () {
+        GC.runCheck();
+    }, GC.timeout);
 };
 
 GC.destroy = function(component) {
@@ -47,32 +57,6 @@ GC.runCheck = function() {
 };
 
 export default GC;
-
-// setTimer
-GC.timeout = 500;
-GC.timeoutStep = function() {
-    GC.timer = setTimeout(function () {
-        GC.runCheck();
-        if(!GC.stopped) {
-            GC.timeoutStep();
-        }
-    }, GC.timeout);
-}
-
-GC.start = function() {
-    if(!this.timer) {
-        this.timeoutStep();
-    }
-    this.stopped = false;
-};
-GC.start();
-
-GC.stop = function() {
-    if(this.timer) {
-        clearTimeout(this.timer);
-    }
-    this.stopped = true;
-};
 
 function extractEventName(event) {
     return (typeof event == 'string')
