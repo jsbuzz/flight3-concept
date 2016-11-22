@@ -2,7 +2,7 @@
 const GC = {
     components: new Map(),
     listeners : new Map(),
-    timeout: 10
+    timeout: 0
 };
 
 GC.registerComponent = function(component) {

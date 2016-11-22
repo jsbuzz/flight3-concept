@@ -32,7 +32,6 @@ class TodoListComponent extends Flight.Component {
 
     clearTodos() {
         this.view.innerHTML = "";
-        Flight.GC.runCheck();
     }
 
     showTodoList(todos) {
