@@ -17,7 +17,9 @@ class Component {
     set view(element) {
         this._view = element;
         this.getOrCreateEventPool().element = element;
-        GC.registerComponent(this);
+        if(!this._attached) {
+            GC.registerComponent(this);            
+        }
     }
 
     listen() {}
@@ -46,19 +48,11 @@ class Component {
         return new EventPoolAccessor(this, getOrCreateEventPool(path));
     }
 
-    addHandler(element, eventName, handler) {
-        this._handlers || (this._handlers = []);
-        this._handlers.push({
-            element : element,
-            event   : eventName,
-            handler : handler
-        });
-    }
-
     static attachTo(element) {
         element = DOM.getElement(element);
 
         const instance = new this(element);
+        instance._attached = true;
         instance.view = element;
         instance.listen();
     }

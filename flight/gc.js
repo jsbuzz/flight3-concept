@@ -11,6 +11,8 @@ GC.registerComponent = function(component) {
 };
 
 GC.registerListener = function(component, element, event, callback) {
+    if(!this.listeners.has(component.componentId)) return;
+    
     this.listeners.get(component.componentId).push({
         element   : element,
         eventName : extractEventName(event),

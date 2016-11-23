@@ -174,6 +174,8 @@
 	};
 
 	GC.registerListener = function (component, element, event, callback) {
+	    if (!this.listeners.has(component.componentId)) return;
+
 	    this.listeners.get(component.componentId).push({
 	        element: element,
 	        eventName: extractEventName(event),
@@ -335,16 +337,6 @@
 	            return new EventPoolAccessor(this, (0, _eventPool.getOrCreateEventPool)(path));
 	        }
 	    }, {
-	        key: 'addHandler',
-	        value: function addHandler(element, eventName, handler) {
-	            this._handlers || (this._handlers = []);
-	            this._handlers.push({
-	                element: element,
-	                event: eventName,
-	                handler: handler
-	            });
-	        }
-	    }, {
 	        key: 'view',
 	        get: function get() {
 	            return this._view;
@@ -352,7 +344,9 @@
 	        set: function set(element) {
 	            this._view = element;
 	            this.getOrCreateEventPool().element = element;
-	            _gc2.default.registerComponent(this);
+	            if (!this._attached) {
+	                _gc2.default.registerComponent(this);
+	            }
 	        }
 	    }], [{
 	        key: 'attachTo',
@@ -360,6 +354,7 @@
 	            element = _DOM2.default.getElement(element);
 
 	            var instance = new this(element);
+	            instance._attached = true;
 	            instance.view = element;
 	            instance.listen();
 	        }
