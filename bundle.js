@@ -165,12 +165,47 @@
 	var GC = {
 	    components: new Map(),
 	    listeners: new Map(),
-	    timeout: 0
+	    elementAttribute: 'flight-component-id'
+	};
+
+	GC.init = function () {
+	    var _this = this;
+
+	    var observer = new MutationObserver(function (mutations) {
+	        mutations.forEach(function (mutation) {
+	            if (mutation.removedNodes) {
+	                mutation.removedNodes.forEach(function (node) {
+	                    _this.removeNode(node);
+	                });
+	            }
+	        });
+	    });
+
+	    observer.observe(document.body, { childList: true, subtree: true });
+	    this.init = false;
+	};
+
+	GC.removeNode = function (element) {
+	    var _this2 = this;
+
+	    if (!element.querySelectorAll) return;
+
+	    var removedViews = element.querySelectorAll('[' + this.elementAttribute + ']');
+
+	    removedViews.forEach(function (view) {
+	        var componentId = view.attributes[_this2.elementAttribute].value;
+	        var component = _this2.components.get(parseInt(componentId));
+
+	        component && _this2.destroy(component);
+	    });
 	};
 
 	GC.registerComponent = function (component) {
 	    this.components.set(component.componentId, component);
-	    this.listeners.set(component.componentId, []);
+	    this.listeners.set(parseInt(component.componentId), []);
+
+	    component.view.setAttribute(this.elementAttribute, component.componentId);
+	    GC.init && GC.init();
 	};
 
 	GC.registerListener = function (component, element, event, callback) {
@@ -181,15 +216,6 @@
 	        eventName: extractEventName(event),
 	        callback: callback
 	    });
-	};
-
-	GC.afterTrigger = function (flightEvent) {
-	    if (GC.timer) {
-	        clearTimeout(GC.timer);
-	    }
-	    GC.timer = setTimeout(function () {
-	        GC.runCheck();
-	    }, GC.timeout);
 	};
 
 	GC.destroy = function (component) {
@@ -221,47 +247,6 @@
 	    component.view = null;
 	    this.components.delete(component.componentId);
 	    this.listeners.delete(component.componentId);
-	};
-
-	GC.isAlive = function (component) {
-	    var element = component.view;
-
-	    while (element) {
-	        if (element.isSameNode(document.body)) {
-	            return true;
-	        }
-	        element = element.parentElement;
-	    }
-	    return false;
-	};
-
-	GC.runCheck = function () {
-	    var _iteratorNormalCompletion2 = true;
-	    var _didIteratorError2 = false;
-	    var _iteratorError2 = undefined;
-
-	    try {
-	        for (var _iterator2 = this.components.values()[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-	            var component = _step2.value;
-
-	            if (!this.isAlive(component)) {
-	                this.destroy(component);
-	            }
-	        }
-	    } catch (err) {
-	        _didIteratorError2 = true;
-	        _iteratorError2 = err;
-	    } finally {
-	        try {
-	            if (!_iteratorNormalCompletion2 && _iterator2.return) {
-	                _iterator2.return();
-	            }
-	        } finally {
-	            if (_didIteratorError2) {
-	                throw _iteratorError2;
-	            }
-	        }
-	    }
 	};
 
 	exports.default = GC;
@@ -344,7 +329,7 @@
 	        set: function set(element) {
 	            this._view = element;
 	            this.getOrCreateEventPool().element = element;
-	            if (!this._attached) {
+	            if (element && !this._attached) {
 	                _gc2.default.registerComponent(this);
 	            }
 	        }
@@ -399,25 +384,18 @@
 
 /***/ },
 /* 4 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ function(module, exports) {
 
 	'use strict';
 
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
-	exports.DataEventPool = exports.EventPool = undefined;
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 	exports.getOrCreateEventPool = getOrCreateEventPool;
 	exports.detachEventPool = detachEventPool;
-
-	var _gc = __webpack_require__(2);
-
-	var _gc2 = _interopRequireDefault(_gc);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
@@ -435,7 +413,6 @@
 	        value: function trigger(flightEvent) {
 	            flightEvent.originalEvent = flightEvent.event();
 	            this.element.dispatchEvent(flightEvent.originalEvent);
-	            _gc2.default.afterTrigger(flightEvent);
 	        }
 	    }, {
 	        key: 'listen',
@@ -1129,7 +1106,7 @@
 	        if (nativeEvent) {
 	            console.log(eventName + ' was triggered on ' + boundActor);
 	        } else {
-	            console.log('    ' + boundActor + ' listening for ' + eventName, boundView);
+	            boundView ? console.log('    ' + boundActor + ' listening for ' + eventName, boundView) : console.log('    ' + boundActor + ' listening for ' + eventName);
 	        }
 	        console.log('    calling ' + boundActor + '.' + handlerToString(handler));
 	        return handler(event);

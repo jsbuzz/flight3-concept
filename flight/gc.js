@@ -2,31 +2,53 @@
 const GC = {
     components: new Map(),
     listeners : new Map(),
-    timeout: 0
+    elementAttribute: 'flight-component-id'
+};
+
+GC.init = function() {
+    var observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if(mutation.removedNodes) {
+                mutation.removedNodes.forEach((node) => {
+                    this.removeNode(node);
+                });
+            }
+        });
+    });
+
+    observer.observe(document.body, {childList: true, subtree: true});
+    this.init = false;
+};
+
+GC.removeNode = function(element) {
+    if(!element.querySelectorAll) return ;
+
+    const removedViews = element.querySelectorAll(`[${this.elementAttribute}]`);
+
+    removedViews.forEach((view) => {
+        let componentId = view.attributes[this.elementAttribute].value;
+        let component = this.components.get(parseInt(componentId));
+
+        component && this.destroy(component);
+    });
 };
 
 GC.registerComponent = function(component) {
     this.components.set(component.componentId, component);
-    this.listeners.set(component.componentId, []);
+    this.listeners.set(parseInt(component.componentId), []);
+
+    component.view.setAttribute(this.elementAttribute, component.componentId);
+    GC.init && GC.init();
 };
 
 GC.registerListener = function(component, element, event, callback) {
     if(!this.listeners.has(component.componentId)) return;
-    
+
     this.listeners.get(component.componentId).push({
         element   : element,
         eventName : extractEventName(event),
         callback  : callback
     });
-};
-
-GC.afterTrigger = function(flightEvent) {
-    if(GC.timer) {
-        clearTimeout(GC.timer);
-    }
-    GC.timer = setTimeout(function () {
-        GC.runCheck();
-    }, GC.timeout);
 };
 
 GC.destroy = function(component) {
@@ -36,26 +58,6 @@ GC.destroy = function(component) {
     component.view = null;
     this.components.delete(component.componentId);
     this.listeners.delete(component.componentId);
-};
-
-GC.isAlive = function(component) {
-    let element = component.view;
-
-    while(element) {
-        if(element.isSameNode(document.body)) {
-            return true;
-        }
-        element = element.parentElement;
-    }
-    return false;
-};
-
-GC.runCheck = function() {
-    for(let component of this.components.values()) {
-        if(!this.isAlive(component)) {
-            this.destroy(component);
-        }
-    }
 };
 
 export default GC;

@@ -17,7 +17,7 @@ class Component {
     set view(element) {
         this._view = element;
         this.getOrCreateEventPool().element = element;
-        if(!this._attached) {
+        if(element && !this._attached) {
             GC.registerComponent(this);
         }
     }

@@ -34,7 +34,10 @@ EventPool.prototype.addEventListener = function(flightEvent, handler) {
         if(nativeEvent) {
             console.log(`${eventName} was triggered on ${boundActor}`);
         } else {
-            console.log(`    ${boundActor} listening for ${eventName}`, boundView);
+            boundView
+                ? console.log(`    ${boundActor} listening for ${eventName}`, boundView)
+                : console.log(`    ${boundActor} listening for ${eventName}`)
+                ;
         }
         console.log(`    calling ${boundActor}.${handlerToString(handler)}`);
         return handler(event);
