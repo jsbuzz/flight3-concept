@@ -7,7 +7,6 @@ class TodoListComponent extends Flight.Component {
         this.on('data/todo').listen(
             Events.Todo.Added, event => this.addTodo(event.todo),
             Events.Todo.Removed, event => this.removeTodo(event.todo),
-            Events.TodoList.Filter, event => this.requestList(event.state),
             Events.TodoList.Ready, event => this.showTodoList(event.todos),
         );
     }
@@ -22,12 +21,6 @@ class TodoListComponent extends Flight.Component {
 
     removeTodo(todo) {
         this.view.querySelector(`#todo-${todo.id}`).remove();
-    }
-
-    requestList(state) {
-        this.on('data/todo').trigger(
-            new Events.TodoList.Request(state)
-        );
     }
 
     clearTodos() {

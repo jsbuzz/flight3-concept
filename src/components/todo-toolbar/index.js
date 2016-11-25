@@ -19,7 +19,7 @@ class TodoToolbarComponent extends Flight.Component {
         let state = event.srcElement.id.substring(7);
         state == 'all' && (state = false);
         this.on('data/todo').trigger(
-            new Events.TodoList.Filter(state)
+            new Events.TodoList.Request(state)
         );
 
         this.view.querySelector(`.selected`).className = '';

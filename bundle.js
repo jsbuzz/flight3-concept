@@ -357,6 +357,8 @@
 	            instance._attached = true;
 	            instance.view = element;
 	            instance.listen();
+
+	            return instance;
 	        }
 	    }]);
 
@@ -1450,8 +1452,6 @@
 	                return _this2.addTodo(event.todo);
 	            }, _events2.default.Todo.Removed, function (event) {
 	                return _this2.removeTodo(event.todo);
-	            }, _events2.default.TodoList.Filter, function (event) {
-	                return _this2.requestList(event.state);
 	            }, _events2.default.TodoList.Ready, function (event) {
 	                return _this2.showTodoList(event.todos);
 	            });
@@ -1469,11 +1469,6 @@
 	        key: 'removeTodo',
 	        value: function removeTodo(todo) {
 	            this.view.querySelector('#todo-' + todo.id).remove();
-	        }
-	    }, {
-	        key: 'requestList',
-	        value: function requestList(state) {
-	            this.on('data/todo').trigger(new _events2.default.TodoList.Request(state));
 	        }
 	    }, {
 	        key: 'clearTodos',
@@ -1807,7 +1802,7 @@
 	            event.preventDefault();
 	            var state = event.srcElement.id.substring(7);
 	            state == 'all' && (state = false);
-	            this.on('data/todo').trigger(new _events2.default.TodoList.Filter(state));
+	            this.on('data/todo').trigger(new _events2.default.TodoList.Request(state));
 
 	            this.view.querySelector('.selected').className = '';
 	            event.srcElement.className = 'selected';

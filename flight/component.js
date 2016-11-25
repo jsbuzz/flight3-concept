@@ -18,7 +18,7 @@ class Component {
         this._view = element;
         this.getOrCreateEventPool().element = element;
         if(!this._attached) {
-            GC.registerComponent(this);            
+            GC.registerComponent(this);
         }
     }
 
@@ -55,6 +55,8 @@ class Component {
         instance._attached = true;
         instance.view = element;
         instance.listen();
+
+        return instance;
     }
 }
 
