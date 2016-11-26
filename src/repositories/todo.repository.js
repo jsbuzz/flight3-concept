@@ -50,7 +50,7 @@ class TodoRepository extends Repository {
 
         for(let [k, todo] of this.todos.entries()) {
             if(!requestEvent.state || todo.state == requestEvent.state) {
-                list.push(todo);
+                list.push(new Todo(todo));
             }
         }
 

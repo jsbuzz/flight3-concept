@@ -7,6 +7,9 @@ import PatchIt from 'flight/patch';
 
 const patchTemplate = PatchIt.template(todoHtml, todoPatch);
 
+const ENTER = 13;
+const ESCAPE = 27;
+
 class TodoComponent extends Flight.Component {
     constructor(todo) {
         super()
@@ -51,18 +54,15 @@ class TodoComponent extends Flight.Component {
     }
 
     onEditorKeyUp(event) {
-        if(event.keyCode == 13) {
+        if(event.keyCode == ENTER) {
             this.todo.title = this.view.$.editor.value;
-
-            this.setEditMode(false);
-
             if(this.view.$.editor.value) {
                 this.on('data/todo').trigger(
                     new Events.Todo.Update(this.todo)
                 );
             } else this.destroy();
 
-        } else if(event.keyCode == 27) {
+        } else if(event.keyCode == ESCAPE) {
             this.cancelEditor()
         }
     }
@@ -73,6 +73,7 @@ class TodoComponent extends Flight.Component {
     }
 
     update(todo) {
+        this.setEditMode(false);
         this.view.$.apply(todo);
     }
 

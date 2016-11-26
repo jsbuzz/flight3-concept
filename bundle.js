@@ -605,26 +605,6 @@
 	    return typeof element == 'string' ? document.querySelector(element) : element;
 	};
 
-	DOM.render = function (source) {
-	    var parent = document.createElement('div');
-	    parent.innerHTML = source;
-
-	    return parent.firstElementChild;
-	};
-
-	DOM.clone = function (subtree) {
-	    return DOM.assignVariables(subtree.cloneNode(true));
-	};
-
-	DOM.assignVariables = function (parentElement) {
-	    parentElement.$ || (parentElement.$ = {});
-	    parentElement.querySelectorAll('[var]').forEach(function (element) {
-	        parentElement.$[element.attributes['var'].value] = element;
-	    });
-
-	    return parentElement;
-	};
-
 	exports.default = DOM;
 
 /***/ },
@@ -1312,7 +1292,7 @@
 	                        todo = _step$value[1];
 
 	                    if (!requestEvent.state || todo.state == requestEvent.state) {
-	                        list.push(todo);
+	                        list.push(new _todo2.default(todo));
 	                    }
 	                }
 	            } catch (err) {
@@ -1569,6 +1549,9 @@
 
 	var patchTemplate = _patch2.default.template(_template2.default, _todo4.default);
 
+	var ENTER = 13;
+	var ESCAPE = 27;
+
 	var TodoComponent = function (_Flight$Component) {
 	    _inherits(TodoComponent, _Flight$Component);
 
@@ -1626,15 +1609,12 @@
 	    }, {
 	        key: 'onEditorKeyUp',
 	        value: function onEditorKeyUp(event) {
-	            if (event.keyCode == 13) {
+	            if (event.keyCode == ENTER) {
 	                this.todo.title = this.view.$.editor.value;
-
-	                this.setEditMode(false);
-
 	                if (this.view.$.editor.value) {
 	                    this.on('data/todo').trigger(new _events2.default.Todo.Update(this.todo));
 	                } else this.destroy();
-	            } else if (event.keyCode == 27) {
+	            } else if (event.keyCode == ESCAPE) {
 	                this.cancelEditor();
 	            }
 	        }
@@ -1647,6 +1627,7 @@
 	    }, {
 	        key: 'update',
 	        value: function update(todo) {
+	            this.setEditMode(false);
 	            this.view.$.apply(todo);
 	        }
 	    }, {
