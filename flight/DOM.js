@@ -9,8 +9,12 @@ DOM.render = (source) => {
     var parent = document.createElement('div');
     parent.innerHTML = source;
 
-    return DOM.assignVariables(parent.firstElementChild);
+    return parent.firstElementChild;
 };
+
+DOM.clone = (subtree) => {
+    return DOM.assignVariables(subtree.cloneNode(true));
+}
 
 DOM.assignVariables = (parentElement) => {
     parentElement.$ || (parentElement.$ = {});

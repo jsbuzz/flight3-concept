@@ -609,7 +609,11 @@
 	    var parent = document.createElement('div');
 	    parent.innerHTML = source;
 
-	    return DOM.assignVariables(parent.firstElementChild);
+	    return parent.firstElementChild;
+	};
+
+	DOM.clone = function (subtree) {
+	    return DOM.assignVariables(subtree.cloneNode(true));
 	};
 
 	DOM.assignVariables = function (parentElement) {
@@ -747,7 +751,7 @@
 
 /***/ },
 /* 7 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ function(module, exports) {
 
 	'use strict';
 
@@ -755,15 +759,49 @@
 	    value: true
 	});
 
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _clone = __webpack_require__(8);
-
-	var _clone2 = _interopRequireDefault(_clone);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var PatchIt = {};
+
+	PatchIt.template = function (html, patch) {
+	    return new PatchTemplate(html, patch);
+	};
+
+	var PatchTemplate = function () {
+	    function PatchTemplate(html, patch) {
+	        _classCallCheck(this, PatchTemplate);
+
+	        this.html = this.processTemplate(html);
+	        this.patch = patch;
+	    }
+
+	    _createClass(PatchTemplate, [{
+	        key: 'render',
+	        value: function render(state) {
+	            var view = this.html.cloneNode(true);
+	            assignVariables(view);
+
+	            var viewPatch = new ViewPatch(view, this.patch);
+	            view.$.apply = function (state) {
+	                return viewPatch.apply(state);
+	            };
+
+	            state && viewPatch.apply(state);
+	            return view;
+	        }
+	    }, {
+	        key: 'processTemplate',
+	        value: function processTemplate(html) {
+	            return typeof html == 'string' ? generateDOM(html) : html;
+	        }
+	    }]);
+
+	    return PatchTemplate;
+	}();
 
 	var ViewPatch = function () {
 	    function ViewPatch(view, patch) {
@@ -824,7 +862,7 @@
 	                }
 	            }
 
-	            this.state = (0, _clone2.default)(newState);
+	            this.state = clone(newState);
 	            return changes;
 	        }
 	    }, {
@@ -892,65 +930,59 @@
 	    return ViewPatch;
 	}();
 
-	var Patch = {
-	    create: function create(view, patch) {
-	        return new ViewPatch(view, patch);
-	    }
-	};
-	exports.default = Patch;
+	exports.default = PatchIt;
 
 
 	function updateElement(element, value) {
-	    var hasProperty = function hasProperty(prop) {
-	        return typeof element[prop] != 'undefined';
+	    var setProperty = function setProperty(prop) {
+	        return typeof element[prop] == 'undefined' ? false : element[prop] = value;
 	    };
 
-	    if (hasProperty('value')) {
-	        element.value = value;
-	    } else if (hasProperty('textContent')) {
-	        element.textContent = value;
-	    }
+	    setProperty('value') || setProperty('textContent');
 	}
 
-/***/ },
-/* 8 */
-/***/ function(module, exports) {
+	function assignVariables(parentElement) {
+	    parentElement.$ || (parentElement.$ = {});
+	    parentElement.querySelectorAll('[var]').forEach(function (element) {
+	        parentElement.$[element.attributes['var'].value] = element;
+	    });
 
-	'use strict';
+	    return parentElement;
+	}
 
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
+	function generateDOM(html) {
+	    var parent = document.createElement('div');
+	    parent.innerHTML = html;
 
-	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+	    return parent.firstElementChild;
+	}
 
-	exports.default = clone;
 	function clone(obj) {
 	    if (obj instanceof Array) return obj.slice();
 
 	    var copied = {};
 
-	    var _iteratorNormalCompletion = true;
-	    var _didIteratorError = false;
-	    var _iteratorError = undefined;
+	    var _iteratorNormalCompletion4 = true;
+	    var _didIteratorError4 = false;
+	    var _iteratorError4 = undefined;
 
 	    try {
-	        for (var _iterator = Object.getOwnPropertyNames(obj)[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-	            var key = _step.value;
+	        for (var _iterator4 = Object.getOwnPropertyNames(obj)[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+	            var key = _step4.value;
 
 	            copied[key] = _typeof(obj[key]) == 'object' ? clone(obj[key]) : obj[key];
 	        }
 	    } catch (err) {
-	        _didIteratorError = true;
-	        _iteratorError = err;
+	        _didIteratorError4 = true;
+	        _iteratorError4 = err;
 	    } finally {
 	        try {
-	            if (!_iteratorNormalCompletion && _iterator.return) {
-	                _iterator.return();
+	            if (!_iteratorNormalCompletion4 && _iterator4.return) {
+	                _iterator4.return();
 	            }
 	        } finally {
-	            if (_didIteratorError) {
-	                throw _iteratorError;
+	            if (_didIteratorError4) {
+	                throw _iteratorError4;
 	            }
 	        }
 	    }
@@ -959,6 +991,7 @@
 	}
 
 /***/ },
+/* 8 */,
 /* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -1522,6 +1555,10 @@
 
 	var _todo4 = _interopRequireDefault(_todo3);
 
+	var _patch = __webpack_require__(7);
+
+	var _patch2 = _interopRequireDefault(_patch);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -1529,6 +1566,8 @@
 	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var patchTemplate = _patch2.default.template(_template2.default, _todo4.default);
 
 	var TodoComponent = function (_Flight$Component) {
 	    _inherits(TodoComponent, _Flight$Component);
@@ -1568,9 +1607,7 @@
 	    }, {
 	        key: 'render',
 	        value: function render() {
-	            this.view = _flight2.default.DOM.render(_template2.default);
-	            this.patch = _flight2.default.Patch.create(this.view, _todo4.default);
-	            this.update(this.todo);
+	            this.view = patchTemplate.render(this.todo);
 	            return _get(TodoComponent.prototype.__proto__ || Object.getPrototypeOf(TodoComponent.prototype), 'render', this).call(this);
 	        }
 	    }, {
@@ -1610,7 +1647,7 @@
 	    }, {
 	        key: 'update',
 	        value: function update(todo) {
-	            this.patch.apply(todo);
+	            this.view.$.apply(todo);
 	        }
 	    }, {
 	        key: 'destroy',
@@ -1640,17 +1677,13 @@
 	    value: true
 	});
 
-	var _flight = __webpack_require__(1);
-
-	var _flight2 = _interopRequireDefault(_flight);
-
 	var _todo = __webpack_require__(15);
 
 	var _todo2 = _interopRequireDefault(_todo);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-	var TodoPatch = function TodoPatch(view) {
+	var todoPatch = function todoPatch(view) {
 	    return {
 	        title: [view.$.label, view.$.editor],
 	        state: function state(_state) {
@@ -1659,7 +1692,7 @@
 	        }
 	    };
 	};
-	exports.default = TodoPatch;
+	exports.default = todoPatch;
 
 /***/ },
 /* 20 */

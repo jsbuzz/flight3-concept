@@ -1,8 +1,11 @@
 import Flight from 'flight';
 import Todo from 'domain/todo';
 import Events from 'events';
-import todoTemplate from './template.html';
-import TodoPatch from './todo.patch';
+import todoHtml from './template.html';
+import todoPatch from './todo.patch';
+import PatchIt from 'flight/patch';
+
+const patchTemplate = PatchIt.template(todoHtml, todoPatch);
 
 class TodoComponent extends Flight.Component {
     constructor(todo) {
@@ -30,9 +33,7 @@ class TodoComponent extends Flight.Component {
     }
 
     render() {
-        this.view = Flight.DOM.render(todoTemplate);
-        this.patch = Flight.Patch.create(this.view, TodoPatch);
-        this.update(this.todo);
+        this.view = patchTemplate.render(this.todo);
         return super.render();
     }
 
@@ -72,7 +73,7 @@ class TodoComponent extends Flight.Component {
     }
 
     update(todo) {
-        this.patch.apply(todo);
+        this.view.$.apply(todo);
     }
 
     destroy() {

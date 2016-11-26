@@ -1,7 +1,6 @@
-import Flight from 'flight';
 import Todo from 'domain/todo';
 
-const TodoPatch = (view) => {
+const todoPatch = (view) => {
     return {
         title : [ view.$.label, view.$.editor ],
         state : (state) => {
@@ -10,4 +9,4 @@ const TodoPatch = (view) => {
         }
     };
 };
-export default TodoPatch;
+export default todoPatch;
