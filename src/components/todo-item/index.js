@@ -7,8 +7,7 @@ import PatchIt from 'flight/patch';
 
 const patchTemplate = PatchIt.template(todoHtml, todoPatch);
 
-const ENTER = 13;
-const ESCAPE = 27;
+const ENTER = 13, ESCAPE = 27;
 
 class TodoComponent extends Flight.Component {
     constructor(todo) {

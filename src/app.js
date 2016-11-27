@@ -3,6 +3,7 @@ import Flight from 'flight';
 import Events from 'events';
 
 import Debugger from 'flight/debugger';
+Debugger.showView = true;
 
 import TodoRepository from 'repositories/todo.repository';
 import TodoListComponent from 'components/todo-list';

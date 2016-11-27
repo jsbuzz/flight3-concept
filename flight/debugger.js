@@ -2,6 +2,7 @@ import Component from './component';
 import Repository from './repository';
 import {EventPool} from './event-pool';
 
+const Debugger = {};
 let actor = null;
 
 // this.on()
@@ -20,6 +21,9 @@ Repository.prototype.on = function(path) {
 EventPool.prototype.$$trigger = EventPool.prototype.trigger;
 EventPool.prototype.trigger = function(flightEvent) {
     console.log(`${flightEvent.name} triggered by ${actor.constructor.name}`);
+    if(Debugger.showEvents) {
+        console.log(flightEvent);
+    }
     return this.$$trigger(flightEvent);
 };
 
@@ -34,7 +38,7 @@ EventPool.prototype.addEventListener = function(flightEvent, handler) {
         if(nativeEvent) {
             console.log(`${eventName} was triggered on ${boundActor}`);
         } else {
-            boundView
+            boundView && Debugger.showView
                 ? console.log(`    ${boundActor} listening for ${eventName}`, boundView)
                 : console.log(`    ${boundActor} listening for ${eventName}`)
                 ;
@@ -52,5 +56,4 @@ function handlerToString(handler) {
     return handler.toString().match(/_this[0-9][.]([^(]*)[(]/).pop();
 }
 
-const Debugger = {};
 export default Debugger;

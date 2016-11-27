@@ -76,11 +76,13 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+	_debugger2.default.showView = true; // app.js
+
+
 	// this defines event pools and initiates data providers (services, repos, clients etc)
 	_todo2.default.attachTo('data/todo');
 
 	// ui elements
-	// app.js
 	_newTodo2.default.attachTo('#new-todo');
 	_todoList2.default.attachTo('#todo-list');
 	_todoToolbar2.default.attachTo('#footer');
@@ -1087,6 +1089,7 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+	var Debugger = {};
 	var actor = null;
 
 	// this.on()
@@ -1105,6 +1108,9 @@
 	_eventPool.EventPool.prototype.$$trigger = _eventPool.EventPool.prototype.trigger;
 	_eventPool.EventPool.prototype.trigger = function (flightEvent) {
 	    console.log(flightEvent.name + ' triggered by ' + actor.constructor.name);
+	    if (Debugger.showEvents) {
+	        console.log(flightEvent);
+	    }
 	    return this.$$trigger(flightEvent);
 	};
 
@@ -1119,7 +1125,7 @@
 	        if (nativeEvent) {
 	            console.log(eventName + ' was triggered on ' + boundActor);
 	        } else {
-	            boundView ? console.log('    ' + boundActor + ' listening for ' + eventName, boundView) : console.log('    ' + boundActor + ' listening for ' + eventName);
+	            boundView && Debugger.showView ? console.log('    ' + boundActor + ' listening for ' + eventName, boundView) : console.log('    ' + boundActor + ' listening for ' + eventName);
 	        }
 	        console.log('    calling ' + boundActor + '.' + handlerToString(handler));
 	        return handler(event);
@@ -1134,7 +1140,6 @@
 	    return handler.toString().match(/_this[0-9][.]([^(]*)[(]/).pop();
 	}
 
-	var Debugger = {};
 	exports.default = Debugger;
 
 /***/ },
@@ -1549,8 +1554,8 @@
 
 	var patchTemplate = _patch2.default.template(_template2.default, _todo4.default);
 
-	var ENTER = 13;
-	var ESCAPE = 27;
+	var ENTER = 13,
+	    ESCAPE = 27;
 
 	var TodoComponent = function (_Flight$Component) {
 	    _inherits(TodoComponent, _Flight$Component);
@@ -1667,9 +1672,9 @@
 	var todoPatch = function todoPatch(view) {
 	    return {
 	        title: [view.$.label, view.$.editor],
-	        state: function state(_state) {
+	        state: function state(_state, todo) {
 	            view.className = _state;
-	            view.$.toggle.checked = _state == _todo2.default.Completed;
+	            view.$.toggle.checked = todo.completed;
 	        }
 	    };
 	};

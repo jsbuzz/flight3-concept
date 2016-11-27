@@ -3,9 +3,9 @@ import Todo from 'domain/todo';
 const todoPatch = (view) => {
     return {
         title : [ view.$.label, view.$.editor ],
-        state : (state) => {
+        state : (state, todo) => {
             view.className = state;
-            view.$.toggle.checked = (state == Todo.Completed);
+            view.$.toggle.checked = todo.completed;
         }
     };
 };
