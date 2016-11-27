@@ -9,16 +9,21 @@ module.exports = {
   },
   module: {
     loaders: [
-      {
-        test: /\.js$/,
-        exclude: /(node_modules|bower_components)/,
-        loader: 'babel?presets[]=es2015'
-      },
-      {
-        test: /\.html$/,
-        loader: 'html',
-        exclude: /node_modules/
-      }
+        {
+          test: /\.js$/,
+          exclude: /(node_modules|bower_components)/,
+          loader: 'babel?presets[]=es2015'
+        },
+        {
+          test: /\.js$/,
+          include: /node_modules\/framework-concept/,
+          loader: 'babel?presets[]=es2015'
+        },
+        {
+            test: /\.html$/,
+            loader: 'html',
+            exclude: /node_modules/
+        }
     ]
   },
   node: {
@@ -28,7 +33,7 @@ module.exports = {
     root: path.resolve(__dirname),
     extensions: ['', '.js', '.html'],
     alias: {
-      flight: 'flight',
+      flight: 'node_modules/framework-concept/flight',
       components: 'src/components',
       domain: 'src/domain',
       events: 'src/events',

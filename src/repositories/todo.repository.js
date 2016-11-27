@@ -1,8 +1,8 @@
-import Repository from 'flight/repository';
+import Flight from 'flight';
 import Events from 'events';
 import Todo from 'domain/todo';
 
-class TodoRepository extends Repository {
+class TodoRepository extends Flight.Repository {
     constructor() {
         super();
         this.todos = new Map();
