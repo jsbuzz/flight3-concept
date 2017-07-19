@@ -1,4 +1,3 @@
-import Todo from 'domain/todo';
 
 const todoPatch = (view) => {
     return {

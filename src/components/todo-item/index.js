@@ -3,9 +3,9 @@ import Todo from 'domain/todo';
 import Events from 'events';
 import todoHtml from './template.html';
 import todoPatch from './todo.patch';
-import PatchIt from 'flight/patch';
+import PatchIt from 'PatchIt';
 
-const patchTemplate = PatchIt.template(todoHtml, todoPatch);
+const todoTemplate = PatchIt.template(todoHtml, todoPatch);
 
 const ENTER = 13, ESCAPE = 27;
 
@@ -13,6 +13,7 @@ class TodoComponent extends Flight.Component {
 
     init(todo) {
         this.todo = todo;
+        this.view = todoTemplate.render(this.todo);
     }
 
     listen() {
@@ -34,11 +35,6 @@ class TodoComponent extends Flight.Component {
         );
     }
 
-    render() {
-        this.view = patchTemplate.render(this.todo);
-        return super.render();
-    }
-
     toggleState(event) {
         this.todo.state = this.view.$.toggle.checked ? Todo.Completed : Todo.Active;
 
@@ -47,9 +43,9 @@ class TodoComponent extends Flight.Component {
         );
     }
 
-    setEditMode(state) {
-        this.view.className = state ? 'editing' : '';
-        state && this.view.$.editor.focus();
+    setEditMode(editing) {
+        this.view.className = `${this.todo.state} ${editing ? 'editing' : ''}`;
+        editing && this.view.$.editor.focus();
     }
 
     onEditorKeyUp(event) {
@@ -73,7 +69,7 @@ class TodoComponent extends Flight.Component {
 
     update(todo) {
         this.setEditMode(false);
-        this.view.$.apply(todo);
+        this.view.apply(todo);
     }
 
     destroy() {

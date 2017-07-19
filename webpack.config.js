@@ -20,6 +20,11 @@ module.exports = {
           loader: 'babel?presets[]=es2015'
         },
         {
+          test: /\.js$/,
+          include: /node_modules\/PatchIt/,
+          loader: 'babel?presets[]=es2015'
+        },
+        {
             test: /\.html$/,
             loader: 'html',
             exclude: /node_modules/
@@ -34,6 +39,7 @@ module.exports = {
     extensions: ['', '.js', '.html'],
     alias: {
       flight: 'node_modules/framework-concept/flight',
+      PatchIt: 'node_modules/PatchIt',
       components: 'src/components',
       domain: 'src/domain',
       events: 'src/events',

@@ -3,6 +3,10 @@
   "version": "0.1.0",
   "description": "Flight 3 concept",
   "main": "todomvc.html",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jsbuzz/flight3-concept.git"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -17,6 +21,7 @@
     "webpack": "^1.13.3"
   },
   "dependencies": {
-    "framework-concept": "git+https://github.com/jsbuzz/framework-concept.git"
+      "framework-concept": "git+https://github.com/jsbuzz/framework-concept.git",
+      "PatchIt": "git+https://github.com/jsbuzz/PatchIt.git"
   }
 }
