@@ -1,4 +1,3 @@
-
 import Flight from 'flight';
 import TodoRepository from 'repositories/todo.repository';
 import TodoListComponent from 'components/todo-list';
