@@ -42,7 +42,7 @@
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
 
@@ -73,26 +73,26 @@
 	// Debugger.init() has to be called before attaching repos and components (!)
 	_flight2.default.Debugger.init();
 
-	// repositories
+	_flight2.default.app(function () {
+	    // repositories
+	    _todo2.default.attachTo('data/todo');
 
-	_todo2.default.attachTo('data/todo');
-
-	// ui elements
-
-	_newTodo2.default.attachTo('#new-todo');
-	_todoList2.default.attachTo('#todo-list');
-	_todoToolbar2.default.attachTo('#footer');
+	    // ui elements
+	    _newTodo2.default.attachTo('#new-todo');
+	    _todoList2.default.attachTo('#todo-list');
+	    _todoToolbar2.default.attachTo('#footer');
+	});
 
 	window.Flight = _flight2.default;
 
-/***/ },
+/***/ }),
 /* 1 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
 
 	Object.defineProperty(exports, "__esModule", {
-	  value: true
+	    value: true
 	});
 
 	var _gc = __webpack_require__(2);
@@ -121,6 +121,12 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
 	var Flight = {};
 	exports.default = Flight;
 
@@ -148,7 +154,7 @@
 	Flight.Event = _event.Event;
 	Flight.eventType = _event.eventType;
 	Flight.eventOfType = _event.eventOfType;
-	Flight.basicEventOf = _event.basicEventOf;
+	Flight.basicEvent = _event.basicEvent;
 
 	// DOM
 
@@ -158,9 +164,34 @@
 
 	Flight.Debugger = _debugger2.default;
 
-/***/ },
+	// System events
+
+	var System = function (_Component) {
+	    _inherits(System, _Component);
+
+	    function System() {
+	        _classCallCheck(this, System);
+
+	        return _possibleConstructorReturn(this, (System.__proto__ || Object.getPrototypeOf(System)).apply(this, arguments));
+	    }
+
+	    return System;
+	}(_component2.default);
+
+	;
+	var _system = new System();
+	Flight.System = {
+	    Ready: (0, _event.basicEvent)().alias('System:Ready')
+	};
+
+	Flight.app = function (startupScript) {
+	    startupScript();
+	    _system.on('data/system').trigger(new Flight.System.Ready());
+	};
+
+/***/ }),
 /* 2 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	'use strict';
 
@@ -262,9 +293,9 @@
 	    return typeof event == 'string' ? event : event.EventName;
 	}
 
-/***/ },
+/***/ }),
 /* 3 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
 
@@ -295,9 +326,18 @@
 	        _classCallCheck(this, Component);
 
 	        this.componentId = ++__componentId;
+
+	        for (var _len = arguments.length, params = Array(_len), _key = 0; _key < _len; _key++) {
+	            params[_key] = arguments[_key];
+	        }
+
+	        this.init.apply(this, params);
 	    }
 
 	    _createClass(Component, [{
+	        key: 'init',
+	        value: function init() {}
+	    }, {
 	        key: 'listen',
 	        value: function listen() {}
 	    }, {
@@ -367,8 +407,8 @@
 	    _createClass(EventPoolAccessor, [{
 	        key: 'listen',
 	        value: function listen() {
-	            for (var _len = arguments.length, listeners = Array(_len), _key = 0; _key < _len; _key++) {
-	                listeners[_key] = arguments[_key];
+	            for (var _len2 = arguments.length, listeners = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+	                listeners[_key2] = arguments[_key2];
 	            }
 
 	            for (var i = 0; i < listeners.length; i += 2) {
@@ -388,9 +428,9 @@
 
 	exports.default = Component;
 
-/***/ },
+/***/ }),
 /* 4 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	'use strict';
 
@@ -596,9 +636,9 @@
 	    return true;
 	};
 
-/***/ },
+/***/ }),
 /* 5 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	'use strict';
 
@@ -613,9 +653,9 @@
 
 	exports.default = DOM;
 
-/***/ },
+/***/ }),
 /* 6 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
 
@@ -632,9 +672,18 @@
 	var Repository = function () {
 	    function Repository() {
 	        _classCallCheck(this, Repository);
+
+	        for (var _len = arguments.length, params = Array(_len), _key = 0; _key < _len; _key++) {
+	            params[_key] = arguments[_key];
+	        }
+
+	        this.init.apply(this, params);
 	    }
 
 	    _createClass(Repository, [{
+	        key: 'init',
+	        value: function init() {}
+	    }, {
 	        key: 'on',
 	        value: function on(path) {
 	            return (0, _eventPool.getOrCreateEventPool)(path);
@@ -656,9 +705,9 @@
 
 	exports.default = Repository;
 
-/***/ },
+/***/ }),
 /* 7 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	"use strict";
 
@@ -778,9 +827,9 @@
 	    }(Event).alias("Event" + ++__eventId);
 	};
 
-/***/ },
+/***/ }),
 /* 8 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
 
@@ -856,9 +905,9 @@
 
 	exports.default = Debugger;
 
-/***/ },
+/***/ }),
 /* 9 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
 
@@ -890,24 +939,32 @@
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
+	var TodosKey = 'TodoMVC-todos';
+
 	var TodoRepository = function (_Flight$Repository) {
 	    _inherits(TodoRepository, _Flight$Repository);
 
 	    function TodoRepository() {
 	        _classCallCheck(this, TodoRepository);
 
-	        var _this = _possibleConstructorReturn(this, (TodoRepository.__proto__ || Object.getPrototypeOf(TodoRepository)).call(this));
-
-	        _this.todos = new Map();
-	        _this._id = 1;
-	        return _this;
+	        return _possibleConstructorReturn(this, (TodoRepository.__proto__ || Object.getPrototypeOf(TodoRepository)).apply(this, arguments));
 	    }
 
 	    _createClass(TodoRepository, [{
+	        key: 'init',
+	        value: function init() {
+	            this.todos = new Map();
+	            this._id = 0;
+	            this.store = window.localStorage;
+	        }
+	    }, {
 	        key: 'listen',
 	        value: function listen() {
 	            var _this2 = this;
 
+	            this.on('data/system').listen(_flight2.default.System.Ready, function (event) {
+	                return _this2.loadTodos();
+	            });
 	            this.on('data/todo').listen(_events2.default.Todo.Add, function (event) {
 	                return _this2.add(event.title);
 	            }, _events2.default.Todo.Update, function (event) {
@@ -923,7 +980,7 @@
 	        value: function add(title) {
 	            var item = new _todo2.default({
 	                title: title,
-	                id: this._id++
+	                id: ++this._id
 	            });
 
 	            this.todos.set(item.id, item);
@@ -987,6 +1044,7 @@
 	    }, {
 	        key: 'activeCount',
 	        value: function activeCount() {
+	            this.storeTodos();
 	            var activeCount = 0;
 	            var _iteratorNormalCompletion2 = true;
 	            var _didIteratorError2 = false;
@@ -1019,6 +1077,54 @@
 
 	            return activeCount;
 	        }
+	    }, {
+	        key: 'storeTodos',
+	        value: function storeTodos() {
+	            var items = [];
+	            var _iteratorNormalCompletion3 = true;
+	            var _didIteratorError3 = false;
+	            var _iteratorError3 = undefined;
+
+	            try {
+	                for (var _iterator3 = this.todos.values()[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+	                    var todo = _step3.value;
+
+	                    items.push(todo);
+	                }
+	            } catch (err) {
+	                _didIteratorError3 = true;
+	                _iteratorError3 = err;
+	            } finally {
+	                try {
+	                    if (!_iteratorNormalCompletion3 && _iterator3.return) {
+	                        _iterator3.return();
+	                    }
+	                } finally {
+	                    if (_didIteratorError3) {
+	                        throw _iteratorError3;
+	                    }
+	                }
+	            }
+
+	            this.store.setItem(TodosKey, JSON.stringify(items));
+	        }
+	    }, {
+	        key: 'loadTodos',
+	        value: function loadTodos() {
+	            var _this3 = this;
+
+	            var todosString = this.store.getItem(TodosKey);
+	            if (todosString) {
+	                var todos = JSON.parse(todosString);
+	                todos.forEach(function (todo) {
+	                    var item = new _todo2.default(todo);
+	                    _this3._id = item.id;
+
+	                    _this3.todos.set(item.id, item);
+	                });
+	                this.prepareList({});
+	            }
+	        }
 	    }]);
 
 	    return TodoRepository;
@@ -1026,9 +1132,9 @@
 
 	exports.default = TodoRepository;
 
-/***/ },
+/***/ }),
 /* 10 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
 
@@ -1053,9 +1159,9 @@
 
 	exports.default = Events;
 
-/***/ },
+/***/ }),
 /* 11 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
 
@@ -1087,9 +1193,9 @@
 
 	exports.default = Todo;
 
-/***/ },
+/***/ }),
 /* 12 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
 
@@ -1120,9 +1226,9 @@
 
 	exports.default = TodoList;
 
-/***/ },
+/***/ }),
 /* 13 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	'use strict';
 
@@ -1158,9 +1264,9 @@
 
 	exports.default = Todo;
 
-/***/ },
+/***/ }),
 /* 14 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
 
@@ -1267,9 +1373,9 @@
 
 	exports.default = TodoListComponent;
 
-/***/ },
+/***/ }),
 /* 15 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
 
@@ -1321,16 +1427,18 @@
 	var TodoComponent = function (_Flight$Component) {
 	    _inherits(TodoComponent, _Flight$Component);
 
-	    function TodoComponent(todo) {
+	    function TodoComponent() {
 	        _classCallCheck(this, TodoComponent);
 
-	        var _this = _possibleConstructorReturn(this, (TodoComponent.__proto__ || Object.getPrototypeOf(TodoComponent)).call(this));
-
-	        _this.todo = todo;
-	        return _this;
+	        return _possibleConstructorReturn(this, (TodoComponent.__proto__ || Object.getPrototypeOf(TodoComponent)).apply(this, arguments));
 	    }
 
 	    _createClass(TodoComponent, [{
+	        key: 'init',
+	        value: function init(todo) {
+	            this.todo = todo;
+	        }
+	    }, {
 	        key: 'listen',
 	        value: function listen() {
 	            var _this2 = this;
@@ -1408,15 +1516,15 @@
 
 	exports.default = TodoComponent;
 
-/***/ },
+/***/ }),
 /* 16 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	module.exports = "<todo>\n    <input var=\"toggle\" class=\"toggle\" type=\"checkbox\"/>\n    <label var=\"label\"></label>\n    <button var=\"destroy\" class=\"destroy\"></button>\n    <input var=\"editor\" class=\"edit\" type=\"text\"/>\n</todo>\n";
 
-/***/ },
+/***/ }),
 /* 17 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
 
@@ -1441,9 +1549,9 @@
 	};
 	exports.default = todoPatch;
 
-/***/ },
+/***/ }),
 /* 18 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	'use strict';
 
@@ -1682,9 +1790,9 @@
 	    return copied;
 	}
 
-/***/ },
+/***/ }),
 /* 19 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
 
@@ -1743,9 +1851,9 @@
 
 	exports.default = NewTodoComponent;
 
-/***/ },
+/***/ }),
 /* 20 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
 
@@ -1817,5 +1925,5 @@
 
 	exports.default = TodoToolbarComponent;
 
-/***/ }
+/***/ })
 /******/ ]);

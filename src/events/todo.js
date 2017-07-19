@@ -11,6 +11,7 @@ const AddTodo = Flight.eventType(
     }
 );
 
+
 Todo.Add = Flight.eventOfType(AddTodo).alias('Todo:Add');
 Todo.Added = Flight.eventOfType(Todo).alias('Todo:Added');
 

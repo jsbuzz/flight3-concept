@@ -2,14 +2,20 @@ import Flight from 'flight';
 import Events from 'events';
 import Todo from 'domain/todo';
 
+const TodosKey = 'TodoMVC-todos';
+
 class TodoRepository extends Flight.Repository {
-    constructor() {
-        super();
+
+    init() {
         this.todos = new Map();
-        this._id = 1;
+        this._id = 0;
+        this.store = window.localStorage;
     }
 
     listen() {
+        this.on('data/system').listen(
+            Flight.System.Ready, event => this.loadTodos(),
+        );
         this.on('data/todo').listen(
             Events.Todo.Add, event => this.add(event.title),
             Events.Todo.Update, event => this.update(event.todo),
@@ -21,7 +27,7 @@ class TodoRepository extends Flight.Repository {
     add(title) {
         const item = new Todo({
             title : title,
-            id    : this._id++
+            id    : ++this._id
         });
 
         this.todos.set(item.id, item);
@@ -58,6 +64,7 @@ class TodoRepository extends Flight.Repository {
     }
 
     activeCount() {
+        this.storeTodos();
         let activeCount = 0;
         for(let [k, todo] of this.todos.entries()) {
             if(todo.state == Todo.Active) {
@@ -65,6 +72,29 @@ class TodoRepository extends Flight.Repository {
             }
         }
         return activeCount;
+    }
+
+    storeTodos() {
+        const items = [];
+        for(let todo of this.todos.values()) {
+            items.push(todo);
+        }
+
+        this.store.setItem(TodosKey, JSON.stringify(items));
+    }
+
+    loadTodos() {
+        const todosString = this.store.getItem(TodosKey);
+        if(todosString) {
+            const todos = JSON.parse(todosString);
+            todos.forEach((todo) => {
+                const item = new Todo(todo);
+                this._id = item.id;
+
+                this.todos.set(item.id, item);
+            });
+            this.prepareList({});
+        }
     }
 }
 
