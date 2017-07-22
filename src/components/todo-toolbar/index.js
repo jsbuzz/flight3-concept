@@ -1,13 +1,14 @@
 import Flight from 'flight';
+import NameSpace from 'namespace';
 import Events from 'events';
 
 class TodoToolbarComponent extends Flight.Component {
 
     listen() {
-        this.on('data/todo').listen(
+        this.on(NameSpace.Todo).listen(
             Events.TodoList.ActiveCount, event => this.refreshCounter(event.activeCount),
         );
-        this.on('ui:#filters').listen(
+        this.ui('#filters').listen(
             'click', event => this.filterClick(event),
         );
 
@@ -18,7 +19,7 @@ class TodoToolbarComponent extends Flight.Component {
         event.preventDefault();
         let state = event.srcElement.id.substring(7);
         state == 'all' && (state = false);
-        this.on('data/todo').trigger(
+        this.on(NameSpace.Todo).trigger(
             new Events.TodoList.Request(state)
         );
 

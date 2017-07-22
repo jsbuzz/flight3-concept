@@ -1,4 +1,5 @@
 import Flight from 'flight';
+import NameSpace from 'namespace';
 import Events from 'events';
 import Todo from 'domain/todo';
 
@@ -13,10 +14,10 @@ class TodoRepository extends Flight.Repository {
     }
 
     listen() {
-        this.on('data/system').listen(
+        this.on(NameSpace.System).listen(
             Flight.System.Ready, event => this.loadTodos(),
         );
-        this.on('data/todo').listen(
+        this.on(NameSpace.Todo).listen(
             Events.Todo.Add, event => this.add(event.title),
             Events.Todo.Update, event => this.update(event.todo),
             Events.Todo.Remove, event => this.remove(event.todo),
@@ -32,23 +33,24 @@ class TodoRepository extends Flight.Repository {
 
         this.todos.set(item.id, item);
 
-        this.on('data/todo').trigger(new Events.Todo.Added(item));
-        this.on('data/todo').trigger(new Events.TodoList.ActiveCount(this.activeCount()));
+        this.on(NameSpace.Todo).trigger(new Events.Todo.Added(item));
+        this.on(NameSpace.Todo).trigger(new Events.TodoList.ActiveCount(this.activeCount()));
     }
 
     update(todo) {
         const item = new Todo(todo);
         this.todos.set(item.id, item);
-        this.on('data/todo').$(todo.id).trigger(new Events.Todo.Updated(item));
-        this.on('data/todo').trigger(new Events.TodoList.ActiveCount(this.activeCount()));
+        const UpdateEvent = Events.Todo.Updated(item.id);
+        this.on(NameSpace.Todo).trigger(new UpdateEvent(item));
+        this.on(NameSpace.Todo).trigger(new Events.TodoList.ActiveCount(this.activeCount()));
     }
 
     remove(todo) {
         const item = new Todo(todo);
         this.todos.delete(todo.id);
-        this.on('data/todo').trigger(new Events.Todo.Removed(item));
-        this.on('data/todo').trigger(new Events.TodoList.ActiveCount(this.activeCount()));
-        this.on('data/todo').$(todo.id).detach();
+        this.on(NameSpace.Todo).trigger(new Events.Todo.Removed(item));
+        this.on(NameSpace.Todo).trigger(new Events.TodoList.ActiveCount(this.activeCount()));
+        this.on(NameSpace.Todo).$(todo.id).detach();
     }
 
     prepareList(requestEvent) {
@@ -60,7 +62,7 @@ class TodoRepository extends Flight.Repository {
             }
         }
 
-        this.on('data/todo').trigger(new Events.TodoList.Ready(list));
+        this.on(NameSpace.Todo).trigger(new Events.TodoList.Ready(list));
     }
 
     activeCount() {
@@ -86,14 +88,19 @@ class TodoRepository extends Flight.Repository {
     loadTodos() {
         const todosString = this.store.getItem(TodosKey);
         if(todosString) {
+            let activeCount = 0;
             const todos = JSON.parse(todosString);
             todos.forEach((todo) => {
                 const item = new Todo(todo);
                 this._id = item.id;
+                activeCount += item.completed ? 0 : 1;
 
                 this.todos.set(item.id, item);
             });
             this.prepareList({});
+            this.on(NameSpace.Todo).trigger(
+                new Events.TodoList.ActiveCount(activeCount)
+            );
         }
     }
 }

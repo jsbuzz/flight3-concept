@@ -17,8 +17,9 @@ describe('TodoItemComponent', () => {
         todo.title = titleAfter;
         expect(view.$.editor.value).be.equal(titleBefore);
 
-        component.on(`data/todo/#${todo.id}`).trigger(
-            new Events.Todo.Updated(todo)
+        const UpdateEvent = Events.Todo.Updated(todo.id);
+        component.on(`data/todo`).trigger(
+            new UpdateEvent(todo)
         );
 
         expect(view.$.editor.value).be.equal(titleAfter);

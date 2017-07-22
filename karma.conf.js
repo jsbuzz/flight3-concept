@@ -56,6 +56,7 @@ module.exports = function(config) {
           components: 'src/components',
           domain: 'src/domain',
           events: 'src/events',
+          namespace: 'src/namespace',
           repositories: 'src/repositories',
         }
       }

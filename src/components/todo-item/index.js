@@ -1,5 +1,6 @@
 import Flight from 'flight';
 import Todo from 'domain/todo';
+import NameSpace from 'namespace';
 import Events from 'events';
 import todoHtml from './template.html';
 import todoPatch from './todo.patch';
@@ -17,20 +18,20 @@ class TodoItemComponent extends Flight.Component {
     }
 
     listen() {
-        this.on(`data/todo/#${this.todo.id}`).listen(
-            Events.Todo.Updated, event => this.update(event.todo)
+        this.on(NameSpace.Todo).listen(
+            Events.Todo.Updated(this.todo.id), event => this.update(event.todo)
         );
-        this.on('ui:label').listen(
+        this.ui('label').listen(
             'dblclick', event => this.setEditMode(true),
         );
-        this.on('ui:.edit').listen(
+        this.ui('.edit').listen(
             'keyup', event => this.onEditorKeyUp(event),
             'blur', event => this.cancelEditor(),
         );
-        this.on('ui:.toggle').listen(
+        this.ui('.toggle').listen(
             'click', event => this.toggleState(event),
         );
-        this.on('ui:.destroy').listen(
+        this.ui('.destroy').listen(
             'click', event => this.destroy(),
         );
     }
@@ -38,7 +39,7 @@ class TodoItemComponent extends Flight.Component {
     toggleState(event) {
         this.todo.state = this.view.$.toggle.checked ? Todo.Completed : Todo.Active;
 
-        this.on('data/todo').trigger(
+        this.on(NameSpace.Todo).trigger(
             new Events.Todo.Update(this.todo)
         );
     }
@@ -52,7 +53,7 @@ class TodoItemComponent extends Flight.Component {
         if(event.keyCode == ENTER) {
             this.todo.title = this.view.$.editor.value;
             if(this.view.$.editor.value) {
-                this.on('data/todo').trigger(
+                this.on(NameSpace.Todo).trigger(
                     new Events.Todo.Update(this.todo)
                 );
             } else this.destroy();
@@ -73,7 +74,7 @@ class TodoItemComponent extends Flight.Component {
     }
 
     destroy() {
-        this.on('data/todo').trigger(
+        this.on(NameSpace.Todo).trigger(
             new Events.Todo.Remove(this.todo)
         );
     }
