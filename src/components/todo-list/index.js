@@ -1,10 +1,11 @@
 import Flight from 'flight';
+import NameSpace from 'namespace';
 import Events from 'events';
 import TodoItemComponent from 'components/todo-item';
 
 class TodoListComponent extends Flight.Component {
     listen() {
-        this.on('data/todo').listen(
+        this.on(NameSpace.Todo).listen(
             Events.Todo.Added, event => this.addTodo(event.todo),
             Events.Todo.Removed, event => this.removeTodo(event.todo),
             Events.TodoList.Ready, event => this.showTodoList(event.todos),

@@ -54,15 +54,15 @@
 
 	var _todo2 = _interopRequireDefault(_todo);
 
-	var _todoList = __webpack_require__(14);
+	var _todoList = __webpack_require__(15);
 
 	var _todoList2 = _interopRequireDefault(_todoList);
 
-	var _newTodo = __webpack_require__(20);
+	var _newTodo = __webpack_require__(21);
 
 	var _newTodo2 = _interopRequireDefault(_newTodo);
 
-	var _todoToolbar = __webpack_require__(21);
+	var _todoToolbar = __webpack_require__(22);
 
 	var _todoToolbar2 = _interopRequireDefault(_todoToolbar);
 
@@ -355,17 +355,13 @@
 	    }, {
 	        key: 'on',
 	        value: function on(path) {
-	            if (path instanceof _eventPool.EventPool) {
-	                return path;
-	            }
-
-	            if (!path || path == 'ui') {
-	                return this.getOrCreateEventPool();
-	            } else if (path.substring(0, 3) === "ui:") {
-	                var element = this.view.querySelector(path.substring(3));
-	                return _eventPool.EventPool.forElement(element, this);
-	            }
-	            return new EventPoolAccessor(this, (0, _eventPool.getOrCreateEventPool)(path));
+	            return path instanceof _eventPool.EventPool ? new EventPoolAccessor(this, path) : new EventPoolAccessor(this, (0, _eventPool.getOrCreateEventPool)(path));
+	        }
+	    }, {
+	        key: 'ui',
+	        value: function ui(query) {
+	            var element = _DOM2.default.getElement(query, this.view);
+	            return element ? _eventPool.EventPool.forElement(element, this) : null;
 	        }
 	    }, {
 	        key: 'view',
@@ -647,8 +643,8 @@
 	});
 	var DOM = {};
 
-	DOM.getElement = function (element) {
-	    return typeof element == 'string' ? document.querySelector(element) : element;
+	DOM.getElement = function (element, root) {
+	    return typeof element == 'string' ? (root || document).querySelector(element) : element;
 	};
 
 	exports.default = DOM;
@@ -686,7 +682,7 @@
 	    }, {
 	        key: 'on',
 	        value: function on(path) {
-	            return (0, _eventPool.getOrCreateEventPool)(path);
+	            return path instanceof _eventPool.EventPool ? path : (0, _eventPool.getOrCreateEventPool)(path);
 	        }
 	    }], [{
 	        key: 'attachTo',
@@ -854,11 +850,16 @@
 
 	Debugger.init = function () {
 
-	    // this.on()
+	    // .on() and .ui()
 	    _component2.default.prototype.$$on = _component2.default.prototype.on;
 	    _component2.default.prototype.on = function (path) {
 	        actor = this;
 	        return this.$$on(path);
+	    };
+	    _component2.default.prototype.$$ui = _component2.default.prototype.ui;
+	    _component2.default.prototype.ui = function (path) {
+	        actor = this;
+	        return this.$$ui(path);
 	    };
 	    _repository2.default.prototype.$$on = _repository2.default.prototype.on;
 	    _repository2.default.prototype.on = function (path) {
@@ -923,11 +924,15 @@
 
 	var _flight2 = _interopRequireDefault(_flight);
 
-	var _events = __webpack_require__(10);
+	var _namespace = __webpack_require__(10);
+
+	var _namespace2 = _interopRequireDefault(_namespace);
+
+	var _events = __webpack_require__(11);
 
 	var _events2 = _interopRequireDefault(_events);
 
-	var _todo = __webpack_require__(13);
+	var _todo = __webpack_require__(14);
 
 	var _todo2 = _interopRequireDefault(_todo);
 
@@ -962,10 +967,10 @@
 	        value: function listen() {
 	            var _this2 = this;
 
-	            this.on('data/system').listen(_flight2.default.System.Ready, function (event) {
+	            this.on(_namespace2.default.System).listen(_flight2.default.System.Ready, function (event) {
 	                return _this2.loadTodos();
 	            });
-	            this.on('data/todo').listen(_events2.default.Todo.Add, function (event) {
+	            this.on(_namespace2.default.Todo).listen(_events2.default.Todo.Add, function (event) {
 	                return _this2.add(event.title);
 	            }, _events2.default.Todo.Update, function (event) {
 	                return _this2.update(event.todo);
@@ -985,25 +990,26 @@
 
 	            this.todos.set(item.id, item);
 
-	            this.on('data/todo').trigger(new _events2.default.Todo.Added(item));
-	            this.on('data/todo').trigger(new _events2.default.TodoList.ActiveCount(this.activeCount()));
+	            this.on(_namespace2.default.Todo).trigger(new _events2.default.Todo.Added(item));
+	            this.on(_namespace2.default.Todo).trigger(new _events2.default.TodoList.ActiveCount(this.activeCount()));
 	        }
 	    }, {
 	        key: 'update',
 	        value: function update(todo) {
 	            var item = new _todo2.default(todo);
 	            this.todos.set(item.id, item);
-	            this.on('data/todo').$(todo.id).trigger(new _events2.default.Todo.Updated(item));
-	            this.on('data/todo').trigger(new _events2.default.TodoList.ActiveCount(this.activeCount()));
+	            var UpdateEvent = _events2.default.Todo.Updated(item.id);
+	            this.on(_namespace2.default.Todo).trigger(new UpdateEvent(item));
+	            this.on(_namespace2.default.Todo).trigger(new _events2.default.TodoList.ActiveCount(this.activeCount()));
 	        }
 	    }, {
 	        key: 'remove',
 	        value: function remove(todo) {
 	            var item = new _todo2.default(todo);
 	            this.todos.delete(todo.id);
-	            this.on('data/todo').trigger(new _events2.default.Todo.Removed(item));
-	            this.on('data/todo').trigger(new _events2.default.TodoList.ActiveCount(this.activeCount()));
-	            this.on('data/todo').$(todo.id).detach();
+	            this.on(_namespace2.default.Todo).trigger(new _events2.default.Todo.Removed(item));
+	            this.on(_namespace2.default.Todo).trigger(new _events2.default.TodoList.ActiveCount(this.activeCount()));
+	            this.on(_namespace2.default.Todo).$(todo.id).detach();
 	        }
 	    }, {
 	        key: 'prepareList',
@@ -1039,7 +1045,7 @@
 	                }
 	            }
 
-	            this.on('data/todo').trigger(new _events2.default.TodoList.Ready(list));
+	            this.on(_namespace2.default.Todo).trigger(new _events2.default.TodoList.Ready(list));
 	        }
 	    }, {
 	        key: 'activeCount',
@@ -1115,14 +1121,17 @@
 
 	            var todosString = this.store.getItem(TodosKey);
 	            if (todosString) {
+	                var activeCount = 0;
 	                var todos = JSON.parse(todosString);
 	                todos.forEach(function (todo) {
 	                    var item = new _todo2.default(todo);
 	                    _this3._id = item.id;
+	                    activeCount += item.completed ? 0 : 1;
 
 	                    _this3.todos.set(item.id, item);
 	                });
 	                this.prepareList({});
+	                this.on(_namespace2.default.Todo).trigger(new _events2.default.TodoList.ActiveCount(activeCount));
 	            }
 	        }
 	    }]);
@@ -1139,14 +1148,37 @@
 	'use strict';
 
 	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+
+	var _flight = __webpack_require__(1);
+
+	var _flight2 = _interopRequireDefault(_flight);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	var NameSpace = {
+	    System: _flight2.default.getOrCreateEventPool('data/system'),
+	    Todo: _flight2.default.getOrCreateEventPool('data/todo')
+	};
+
+	exports.default = NameSpace;
+
+/***/ }),
+/* 11 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
 
-	var _todo = __webpack_require__(11);
+	var _todo = __webpack_require__(12);
 
 	var _todo2 = _interopRequireDefault(_todo);
 
-	var _todoList = __webpack_require__(12);
+	var _todoList = __webpack_require__(13);
 
 	var _todoList2 = _interopRequireDefault(_todoList);
 
@@ -1160,7 +1192,7 @@
 	exports.default = Events;
 
 /***/ }),
-/* 11 */
+/* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1186,7 +1218,9 @@
 	Todo.Added = _flight2.default.eventOfType(Todo).alias('Todo:Added');
 
 	Todo.Update = _flight2.default.eventOfType(Todo).alias('Todo:Update');
-	Todo.Updated = _flight2.default.eventOfType(Todo).alias('Todo:Updated');
+	Todo.Updated = function (id) {
+	    return _flight2.default.eventOfType(Todo).alias('Todo:' + id + ':Updated');
+	};
 
 	Todo.Remove = _flight2.default.eventOfType(Todo).alias('Todo:Remove');
 	Todo.Removed = _flight2.default.eventOfType(Todo).alias('Todo:Removed');
@@ -1194,7 +1228,7 @@
 	exports.default = Todo;
 
 /***/ }),
-/* 12 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1227,7 +1261,7 @@
 	exports.default = TodoList;
 
 /***/ }),
-/* 13 */
+/* 14 */
 /***/ (function(module, exports) {
 
 	'use strict';
@@ -1265,7 +1299,7 @@
 	exports.default = Todo;
 
 /***/ }),
-/* 14 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1280,11 +1314,15 @@
 
 	var _flight2 = _interopRequireDefault(_flight);
 
-	var _events = __webpack_require__(10);
+	var _namespace = __webpack_require__(10);
+
+	var _namespace2 = _interopRequireDefault(_namespace);
+
+	var _events = __webpack_require__(11);
 
 	var _events2 = _interopRequireDefault(_events);
 
-	var _todoItem = __webpack_require__(15);
+	var _todoItem = __webpack_require__(16);
 
 	var _todoItem2 = _interopRequireDefault(_todoItem);
 
@@ -1310,7 +1348,7 @@
 	        value: function listen() {
 	            var _this2 = this;
 
-	            this.on('data/todo').listen(_events2.default.Todo.Added, function (event) {
+	            this.on(_namespace2.default.Todo).listen(_events2.default.Todo.Added, function (event) {
 	                return _this2.addTodo(event.todo);
 	            }, _events2.default.Todo.Removed, function (event) {
 	                return _this2.removeTodo(event.todo);
@@ -1374,7 +1412,7 @@
 	exports.default = TodoListComponent;
 
 /***/ }),
-/* 15 */
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1389,23 +1427,27 @@
 
 	var _flight2 = _interopRequireDefault(_flight);
 
-	var _todo = __webpack_require__(13);
+	var _todo = __webpack_require__(14);
 
 	var _todo2 = _interopRequireDefault(_todo);
 
-	var _events = __webpack_require__(10);
+	var _namespace = __webpack_require__(10);
+
+	var _namespace2 = _interopRequireDefault(_namespace);
+
+	var _events = __webpack_require__(11);
 
 	var _events2 = _interopRequireDefault(_events);
 
-	var _template = __webpack_require__(16);
+	var _template = __webpack_require__(17);
 
 	var _template2 = _interopRequireDefault(_template);
 
-	var _todo3 = __webpack_require__(17);
+	var _todo3 = __webpack_require__(18);
 
 	var _todo4 = _interopRequireDefault(_todo3);
 
-	var _PatchIt = __webpack_require__(19);
+	var _PatchIt = __webpack_require__(20);
 
 	var _PatchIt2 = _interopRequireDefault(_PatchIt);
 
@@ -1442,21 +1484,21 @@
 	        value: function listen() {
 	            var _this2 = this;
 
-	            this.on('data/todo/#' + this.todo.id).listen(_events2.default.Todo.Updated, function (event) {
+	            this.on(_namespace2.default.Todo).listen(_events2.default.Todo.Updated(this.todo.id), function (event) {
 	                return _this2.update(event.todo);
 	            });
-	            this.on('ui:label').listen('dblclick', function (event) {
+	            this.ui('label').listen('dblclick', function (event) {
 	                return _this2.setEditMode(true);
 	            });
-	            this.on('ui:.edit').listen('keyup', function (event) {
+	            this.ui('.edit').listen('keyup', function (event) {
 	                return _this2.onEditorKeyUp(event);
 	            }, 'blur', function (event) {
 	                return _this2.cancelEditor();
 	            });
-	            this.on('ui:.toggle').listen('click', function (event) {
+	            this.ui('.toggle').listen('click', function (event) {
 	                return _this2.toggleState(event);
 	            });
-	            this.on('ui:.destroy').listen('click', function (event) {
+	            this.ui('.destroy').listen('click', function (event) {
 	                return _this2.destroy();
 	            });
 	        }
@@ -1465,7 +1507,7 @@
 	        value: function toggleState(event) {
 	            this.todo.state = this.view.$.toggle.checked ? _todo2.default.Completed : _todo2.default.Active;
 
-	            this.on('data/todo').trigger(new _events2.default.Todo.Update(this.todo));
+	            this.on(_namespace2.default.Todo).trigger(new _events2.default.Todo.Update(this.todo));
 	        }
 	    }, {
 	        key: 'setEditMode',
@@ -1479,7 +1521,7 @@
 	            if (event.keyCode == ENTER) {
 	                this.todo.title = this.view.$.editor.value;
 	                if (this.view.$.editor.value) {
-	                    this.on('data/todo').trigger(new _events2.default.Todo.Update(this.todo));
+	                    this.on(_namespace2.default.Todo).trigger(new _events2.default.Todo.Update(this.todo));
 	                } else this.destroy();
 	            } else if (event.keyCode == ESCAPE) {
 	                this.cancelEditor();
@@ -1500,7 +1542,7 @@
 	    }, {
 	        key: 'destroy',
 	        value: function destroy() {
-	            this.on('data/todo').trigger(new _events2.default.Todo.Remove(this.todo));
+	            this.on(_namespace2.default.Todo).trigger(new _events2.default.Todo.Remove(this.todo));
 	        }
 	    }]);
 
@@ -1510,13 +1552,13 @@
 	exports.default = TodoItemComponent;
 
 /***/ }),
-/* 16 */
+/* 17 */
 /***/ (function(module, exports) {
 
 	module.exports = "<todo>\n    <input var=\"toggle\" class=\"toggle\" type=\"checkbox\"/>\n    <label var=\"label\"></label>\n    <button var=\"destroy\" class=\"destroy\"></button>\n    <input var=\"editor\" class=\"edit\" type=\"text\"/>\n</todo>\n";
 
 /***/ }),
-/* 17 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1525,7 +1567,7 @@
 	    value: true
 	});
 
-	var _marked = __webpack_require__(18);
+	var _marked = __webpack_require__(19);
 
 	var _marked2 = _interopRequireDefault(_marked);
 
@@ -1546,7 +1588,7 @@
 	exports.default = todoPatch;
 
 /***/ }),
-/* 18 */
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {/**
@@ -2839,7 +2881,7 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
 
 /***/ }),
-/* 19 */
+/* 20 */
 /***/ (function(module, exports) {
 
 	'use strict';
@@ -3080,67 +3122,6 @@
 	}
 
 /***/ }),
-/* 20 */
-/***/ (function(module, exports, __webpack_require__) {
-
-	'use strict';
-
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-	var _flight = __webpack_require__(1);
-
-	var _flight2 = _interopRequireDefault(_flight);
-
-	var _events = __webpack_require__(10);
-
-	var _events2 = _interopRequireDefault(_events);
-
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-	var NewTodoComponent = function (_Flight$Component) {
-	    _inherits(NewTodoComponent, _Flight$Component);
-
-	    function NewTodoComponent() {
-	        _classCallCheck(this, NewTodoComponent);
-
-	        return _possibleConstructorReturn(this, (NewTodoComponent.__proto__ || Object.getPrototypeOf(NewTodoComponent)).apply(this, arguments));
-	    }
-
-	    _createClass(NewTodoComponent, [{
-	        key: 'listen',
-	        value: function listen() {
-	            var _this2 = this;
-
-	            this.on('ui').listen('keypress', function (event) {
-	                return _this2.onKeyPress(event);
-	            });
-	        }
-	    }, {
-	        key: 'onKeyPress',
-	        value: function onKeyPress(event) {
-	            if (event.charCode == 13 && this.view.value.length) {
-	                this.on('data/todo').trigger(new _events2.default.Todo.Add(this.view.value));
-	                this.view.value = "";
-	            }
-	        }
-	    }]);
-
-	    return NewTodoComponent;
-	}(_flight2.default.Component);
-
-	exports.default = NewTodoComponent;
-
-/***/ }),
 /* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -3156,7 +3137,78 @@
 
 	var _flight2 = _interopRequireDefault(_flight);
 
-	var _events = __webpack_require__(10);
+	var _namespace = __webpack_require__(10);
+
+	var _namespace2 = _interopRequireDefault(_namespace);
+
+	var _events = __webpack_require__(11);
+
+	var _events2 = _interopRequireDefault(_events);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var ENTER = 13;
+
+	var NewTodoComponent = function (_Flight$Component) {
+	    _inherits(NewTodoComponent, _Flight$Component);
+
+	    function NewTodoComponent() {
+	        _classCallCheck(this, NewTodoComponent);
+
+	        return _possibleConstructorReturn(this, (NewTodoComponent.__proto__ || Object.getPrototypeOf(NewTodoComponent)).apply(this, arguments));
+	    }
+
+	    _createClass(NewTodoComponent, [{
+	        key: 'listen',
+	        value: function listen() {
+	            var _this2 = this;
+
+	            this.ui(this.view).listen('keypress', function (event) {
+	                return _this2.onKeyPress(event);
+	            });
+	        }
+	    }, {
+	        key: 'onKeyPress',
+	        value: function onKeyPress(event) {
+	            if (event.charCode == ENTER && this.view.value.length) {
+	                this.on(_namespace2.default.Todo).trigger(new _events2.default.Todo.Add(this.view.value));
+	                this.view.value = "";
+	            }
+	        }
+	    }]);
+
+	    return NewTodoComponent;
+	}(_flight2.default.Component);
+
+	exports.default = NewTodoComponent;
+
+/***/ }),
+/* 22 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _flight = __webpack_require__(1);
+
+	var _flight2 = _interopRequireDefault(_flight);
+
+	var _namespace = __webpack_require__(10);
+
+	var _namespace2 = _interopRequireDefault(_namespace);
+
+	var _events = __webpack_require__(11);
 
 	var _events2 = _interopRequireDefault(_events);
 
@@ -3182,10 +3234,10 @@
 	        value: function listen() {
 	            var _this2 = this;
 
-	            this.on('data/todo').listen(_events2.default.TodoList.ActiveCount, function (event) {
+	            this.on(_namespace2.default.Todo).listen(_events2.default.TodoList.ActiveCount, function (event) {
 	                return _this2.refreshCounter(event.activeCount);
 	            });
-	            this.on('ui:#filters').listen('click', function (event) {
+	            this.ui('#filters').listen('click', function (event) {
 	                return _this2.filterClick(event);
 	            });
 
@@ -3197,7 +3249,7 @@
 	            event.preventDefault();
 	            var state = event.srcElement.id.substring(7);
 	            state == 'all' && (state = false);
-	            this.on('data/todo').trigger(new _events2.default.TodoList.Request(state));
+	            this.on(_namespace2.default.Todo).trigger(new _events2.default.TodoList.Request(state));
 
 	            this.view.querySelector('.selected').className = '';
 	            event.srcElement.className = 'selected';
