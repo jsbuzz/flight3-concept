@@ -1422,16 +1422,16 @@
 	var ENTER = 13,
 	    ESCAPE = 27;
 
-	var TodoComponent = function (_Flight$Component) {
-	    _inherits(TodoComponent, _Flight$Component);
+	var TodoItemComponent = function (_Flight$Component) {
+	    _inherits(TodoItemComponent, _Flight$Component);
 
-	    function TodoComponent() {
-	        _classCallCheck(this, TodoComponent);
+	    function TodoItemComponent() {
+	        _classCallCheck(this, TodoItemComponent);
 
-	        return _possibleConstructorReturn(this, (TodoComponent.__proto__ || Object.getPrototypeOf(TodoComponent)).apply(this, arguments));
+	        return _possibleConstructorReturn(this, (TodoItemComponent.__proto__ || Object.getPrototypeOf(TodoItemComponent)).apply(this, arguments));
 	    }
 
-	    _createClass(TodoComponent, [{
+	    _createClass(TodoItemComponent, [{
 	        key: 'init',
 	        value: function init(todo) {
 	            this.todo = todo;
@@ -1504,10 +1504,10 @@
 	        }
 	    }]);
 
-	    return TodoComponent;
+	    return TodoItemComponent;
 	}(_flight2.default.Component);
 
-	exports.default = TodoComponent;
+	exports.default = TodoItemComponent;
 
 /***/ }),
 /* 16 */

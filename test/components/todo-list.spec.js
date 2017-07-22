@@ -6,47 +6,53 @@ import Events from 'events';
 
 describe('TodoListComponent', () => {
     const view = document.createElement('ul');
-    const component = TodoListComponent.attachTo(view);                        // this initiates listeners as well
+    const component = TodoListComponent.attachTo(view);
 
     beforeEach(() => {
         component.clearTodos();
     });
 
-    it("on Todo:Added event should add a new todo to the list", ()=>{
-        const title = "pass the test";
-        const todo = aTodo(title);
-        component.on('data/todo').trigger(new Events.Todo.Added(todo));
+    it("should add a new todo on Todo:Added", () => {
+        expect(view.querySelectorAll('li todo').length).to.equal(0);
 
-        let label = view.querySelector('li todo label').innerHTML.trim();
-        expect(label).to.equal(title);
-        // expect(view.querySelector('li todo label')).to.contain(todo.title);
+        for(let i = 1; i < 10; i++) {
+            component.on('data/todo').trigger(new Events.Todo.Added(aTodo()));
+            expect(view.querySelectorAll('li todo').length).to.equal(i);
+        }
     });
 
-    // it("on Todo:Removed event should remove the item from the list", ()=>{
-    //     const todo = aTodo();
-    //     $('data/todo').trigger(new Events.Todo.Added(todo));
-    //
-    //     expect(view).to.haveElement('li todo');
-    //
-    //     $('data/todo').trigger(new Events.Todo.Removed(todo));
-    //     expect(view).not.to.haveElement('li todo');
-    // });
-    //
-    // it("on TodoList:Ready event should render the new list", ()=>{
-    //     const todo = aTodo();
-    //     $('data/todo').trigger(new Events.Todo.Added(todo));
-    //
-    //     const todos = [aTodo(), aTodo(), aTodo()];
-    //     $('data/todo').trigger(new Events.TodoList.Ready(todos));
-    //
-    //     expect($('li todo', view).length).to.equal(todos.length);
-    // });
+    it("should remove todo on Todo:Removed", () => {
+        const firstTodo = aTodo('todo-1', Todo.Active, 1);
+        component.on('data/todo').trigger(
+            new Events.Todo.Added(firstTodo)
+        );
+        component.on('data/todo').trigger(
+            new Events.Todo.Added(aTodo())
+        );
+        expect(view.querySelectorAll('li').length).to.equal(2);
+
+        component.on('data/todo').trigger(new Events.Todo.Removed(firstTodo));
+        expect(view.querySelectorAll('li').length).to.equal(1);
+    });
+
+    it("should render the new list on TodoList:Ready event", () => {
+        const todo = aTodo();
+        component.on('data/todo').trigger(new Events.Todo.Added(todo));
+
+        expect(view.querySelectorAll('li todo').length).to.equal(1);
+
+        const todos = [ aTodo(), aTodo(), aTodo() ];
+        component.on('data/todo').trigger(new Events.TodoList.Ready(todos));
+
+        expect(view.querySelectorAll('li todo').length).to.equal(todos.length);
+    });
 });
 
+let __id = 1;
 function aTodo(title, state, id) {
     return new Todo({
         title : title || "todo",
         state : state || Todo.Active,
-        id : id || 1,
+        id : id || ++__id,
     });
 }

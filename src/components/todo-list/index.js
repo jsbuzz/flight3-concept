@@ -1,6 +1,6 @@
 import Flight from 'flight';
 import Events from 'events';
-import TodoComponent from 'components/todo-item';
+import TodoItemComponent from 'components/todo-item';
 
 class TodoListComponent extends Flight.Component {
     listen() {
@@ -12,7 +12,7 @@ class TodoListComponent extends Flight.Component {
     }
 
     addTodo(todo) {
-        const todoComponent = new TodoComponent(todo);
+        const todoComponent = new TodoItemComponent(todo);
         const newItem = document.createElement('li');
         newItem.id = `todo-${todo.id}`;
         newItem.appendChild(todoComponent.render());

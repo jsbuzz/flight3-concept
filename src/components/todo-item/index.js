@@ -9,7 +9,7 @@ const todoTemplate = PatchIt.template(todoHtml, todoPatch);
 
 const ENTER = 13, ESCAPE = 27;
 
-class TodoComponent extends Flight.Component {
+class TodoItemComponent extends Flight.Component {
 
     init(todo) {
         this.todo = todo;
@@ -79,4 +79,4 @@ class TodoComponent extends Flight.Component {
     }
 }
 
-export default TodoComponent;
+export default TodoItemComponent;
