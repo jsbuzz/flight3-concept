@@ -2,7 +2,7 @@ import Flight from 'flight';
 import NameSpace from 'namespace';
 import Events from 'events';
 
-class TodoToolbarComponent extends Flight.Component {
+class TodoToolbarComponent extends Flight.UIComponent {
 
     listen() {
         this.on(NameSpace.Todo).listen(

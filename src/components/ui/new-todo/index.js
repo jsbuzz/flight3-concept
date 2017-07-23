@@ -4,7 +4,7 @@ import Events from 'events';
 
 const ENTER = 13;
 
-class NewTodoComponent extends Flight.Component {
+class NewTodoComponent extends Flight.UIComponent {
 
     listen() {
         this.ui(this.view).listen(

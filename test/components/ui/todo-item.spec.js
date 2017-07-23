@@ -1,4 +1,4 @@
-import TodoItemComponent from 'components/todo-item';
+import TodoItemComponent from 'components/ui/todo-item';
 import Todo from 'domain/todo';
 import NameSpace from 'namespace';
 import Events from 'events';

@@ -3,9 +3,9 @@ import NameSpace from 'namespace';
 import Events from 'events';
 import Todo from 'domain/todo';
 
-const TodosKey = 'TodoMVC-todos';
+const TODOS_KEY = 'TodoMVC-todos';
 
-class TodoRepository extends Flight.Repository {
+class TodoComponent extends Flight.DataComponent {
 
     init() {
         this.todos = new Map();
@@ -82,11 +82,11 @@ class TodoRepository extends Flight.Repository {
             items.push(todo);
         }
 
-        this.store.setItem(TodosKey, JSON.stringify(items));
+        this.store.setItem(TODOS_KEY, JSON.stringify(items));
     }
 
     loadTodos() {
-        const todosString = this.store.getItem(TodosKey);
+        const todosString = this.store.getItem(TODOS_KEY);
         if(todosString) {
             let activeCount = 0;
             const todos = JSON.parse(todosString);
@@ -105,4 +105,4 @@ class TodoRepository extends Flight.Repository {
     }
 }
 
-export default TodoRepository;
+export default TodoComponent;

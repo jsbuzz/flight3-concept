@@ -30,7 +30,7 @@
   },
   "dependencies": {
     "PatchIt": "git+https://github.com/jsbuzz/PatchIt.git",
-    "framework-concept": "git+https://github.com/jsbuzz/framework-concept.git",
+    "framework-concept": "git+https://github.com/jsbuzz/framework-concept.git#v0.1",
     "marked": "^0.3.6"
   }
 }
