@@ -1,5 +1,6 @@
 import TodoItemComponent from 'components/todo-item';
 import Todo from 'domain/todo';
+import NameSpace from 'namespace';
 import Events from 'events';
 
 describe('TodoItemComponent', () => {
@@ -18,9 +19,7 @@ describe('TodoItemComponent', () => {
         expect(view.$.editor.value).be.equal(titleBefore);
 
         const UpdateEvent = Events.Todo.Updated(todo.id);
-        component.on(`data/todo`).trigger(
-            new UpdateEvent(todo)
-        );
+        component.on(NameSpace.Todo).trigger(new UpdateEvent(todo));
 
         expect(view.$.editor.value).be.equal(titleAfter);
     });
