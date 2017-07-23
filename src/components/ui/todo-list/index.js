@@ -1,9 +1,9 @@
 import Flight from 'flight';
 import NameSpace from 'namespace';
 import Events from 'events';
-import TodoItemComponent from 'components/todo-item';
+import TodoItemComponent from 'components/ui/todo-item';
 
-class TodoListComponent extends Flight.Component {
+class TodoListComponent extends Flight.UIComponent {
     listen() {
         this.on(NameSpace.Todo).listen(
             Events.Todo.Added, event => this.addTodo(event.todo),
